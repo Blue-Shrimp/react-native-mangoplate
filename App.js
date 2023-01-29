@@ -1,15 +1,18 @@
 import React from 'react'
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
-import Config from 'react-native-config'
+import { SafeAreaView, StyleSheet, Text, Image } from 'react-native'
+
+import '@common/Constants'
+import '@network/Fetch'
 
 const App = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <Text>ENV : {Config.ENV}</Text>
-      <Text>Build Version : {Config.BUILD_VERSION}</Text>
-      <Text>App Version : {Config.APP_VERSION}</Text>
-      <Text>APP Name: {Config.APP_NAME}</Text>
-      <Text>APP ID : {Config.APP_ID}</Text>
+      <Text>ENV : {appConfig.envName}</Text>
+      <Text>Build Version : {appConfig.buildVersion}</Text>
+      <Text>App Version : {appConfig.appVersion}</Text>
+      <Text>APP Name: {appConfig.appName}</Text>
+      <Text>APP ID : {appConfig.appId}</Text>
+      <Image source={require('@images/marker.png')}></Image>
     </SafeAreaView>
   )
 }
