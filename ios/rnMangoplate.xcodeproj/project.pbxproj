@@ -11,6 +11,7 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		1AA0E5052986526A009CC3B8 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 1AA0E5042986526A009CC3B8 /* Config.xcconfig */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		C1262C0C4AB2A1F323F04F1A /* libPods-rnMangoplate.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E74E3F80297A9E27585AE9A4 /* libPods-rnMangoplate.a */; };
 		FD44A9292FB64088BDF38303 /* libPods-rnMangoplate-rnMangoplateTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 252C995B621E6A187F110C0B /* libPods-rnMangoplate-rnMangoplateTests.a */; };
@@ -36,6 +37,7 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = rnMangoplate/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = rnMangoplate/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = rnMangoplate/main.m; sourceTree = "<group>"; };
+		1AA0E5042986526A009CC3B8 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		23B1DEB9614EE2C219FA7E4A /* Pods-rnMangoplate.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-rnMangoplate.release.xcconfig"; path = "Target Support Files/Pods-rnMangoplate/Pods-rnMangoplate.release.xcconfig"; sourceTree = "<group>"; };
 		252C995B621E6A187F110C0B /* libPods-rnMangoplate-rnMangoplateTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-rnMangoplate-rnMangoplateTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5E085DFCA4BADD40B4547F5C /* Pods-rnMangoplate-rnMangoplateTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-rnMangoplate-rnMangoplateTests.debug.xcconfig"; path = "Target Support Files/Pods-rnMangoplate-rnMangoplateTests/Pods-rnMangoplate-rnMangoplateTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -114,7 +116,6 @@
 				5E085DFCA4BADD40B4547F5C /* Pods-rnMangoplate-rnMangoplateTests.debug.xcconfig */,
 				79D30EB564759B8F4B1AC5DF /* Pods-rnMangoplate-rnMangoplateTests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -128,6 +129,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				1AA0E5042986526A009CC3B8 /* Config.xcconfig */,
 				13B07FAE1A68108700A75B9A /* rnMangoplate */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* rnMangoplateTests */,
@@ -244,6 +246,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
+				1AA0E5052986526A009CC3B8 /* Config.xcconfig in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -530,6 +533,7 @@
 		};
 		83CBBA201A601CBA00E9B192 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1AA0E5042986526A009CC3B8 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -595,6 +599,7 @@
 		};
 		83CBBA211A601CBA00E9B192 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1AA0E5042986526A009CC3B8 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;

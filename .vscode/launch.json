@@ -5,34 +5,52 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Android",
+      "name": "Develop Android",
+      "runArguments": ["--variant=developdebug"],
       "cwd": "${workspaceFolder}",
       "type": "reactnative",
       "request": "launch",
       "platform": "android"
     },
     {
-      "name": "Run Android",
-      "cwd": "${workspaceFolder}",
-      "type": "reactnative",
-      "request": "launch",
-      "platform": "android",
-      "enableDebug": false
-    },
-    {
-      "name": "Debug iOS",
+      "name": "Develop iOS",
+      "runArguments": ["--scheme=Develop"],
       "cwd": "${workspaceFolder}",
       "type": "reactnative",
       "request": "launch",
       "platform": "ios"
     },
     {
-      "name": "Run iOS",
+      "name": "Stage Android",
+      "runArguments": ["--variant=stagedebug"],
       "cwd": "${workspaceFolder}",
       "type": "reactnative",
       "request": "launch",
-      "platform": "ios",
-      "enableDebug": false
+      "platform": "android"
+    },
+    {
+      "name": "Stage iOS",
+      "runArguments": ["--scheme=Stage"],
+      "cwd": "${workspaceFolder}",
+      "type": "reactnative",
+      "request": "launch",
+      "platform": "ios"
+    },
+    {
+      "name": "Product Android",
+      "runArguments": ["--variant=productdebug"],
+      "cwd": "${workspaceFolder}",
+      "type": "reactnative",
+      "request": "launch",
+      "platform": "android"
+    },
+    {
+      "name": "Product iOS",
+      "runArguments": ["--scheme=Product"],
+      "cwd": "${workspaceFolder}",
+      "type": "reactnative",
+      "request": "launch",
+      "platform": "ios"
     }
   ]
 }
