@@ -2,8 +2,11 @@ apply plugin: "com.android.application"
 
 project.ext.envConfigFiles = [
     developdebug: "env/.env.develop",
+    developrelease: "env/.env.develop", 
     stagedebug: "env/.env.stage",
+    stagerelease: "env/.env.stage",
     productdebug: "env/.env.product",    
+    productrelease: "env/.env.product",    
 ]
 apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
 
@@ -160,6 +163,14 @@ android {
             storePassword 'android'
             keyAlias 'androiddebugkey'
             keyPassword 'android'
+        }
+        release {
+            if (project.hasProperty('MANGO_APP_KEYSTORE_FILE')) {
+                storeFile file(MANGO_APP_KEYSTORE_FILE)
+                storePassword MANGO_APP_KEYSTORE_PASSWORD
+                keyAlias MANGO_APP_KEY_ALIAS
+                keyPassword MANGO_APP_KEY_PASSWORD
+            }
         }
     }
     buildTypes {

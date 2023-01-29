@@ -13,7 +13,10 @@
     "clean-cache": "watchman watch-del-all && rm -rf $TMPDIR/react-native-packager-cache-* && rm -rf $TMPDIR/metro-bundler-cache-* && yarn cache clean && cd ios && rm -rf ~/Library/Developer/Xcode/DerivedData/ && rm -rf ~/Library/Caches/CocoaPods && cd ..",
     "clean-ios": "cd ios && xcodebuild clean && cd ..",
     "clean-android": "cd android && ./gradlew clean && cd ..",
-    "clean-all": "yarn delete-resource && yarn clean-cache && yarn reinstall && yarn clean-android && yarn clean-ios && yarn start --reset-cache"
+    "clean-all": "yarn delete-resource && yarn clean-cache && yarn reinstall && yarn clean-android && yarn clean-ios && yarn start --reset-cache",
+    "make-apk:dev": "cd android && ./gradlew assembleDevelopRelease && cd ..",
+    "make-apk:stg": "cd android && ./gradlew assembleStageRelease && cd ..",
+    "make-apk:prd": "cd android && ./gradlew app:assembleProductRelease && cd .."
   },
   "dependencies": {
     "babel-plugin-module-resolver": "^5.0.0",
