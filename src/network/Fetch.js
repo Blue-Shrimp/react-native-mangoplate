@@ -5,6 +5,8 @@ const ContentType = {
   Json: 'application/json; charset=utf-8',
 }
 
+const urlHost = appConfig.urlHost
+
 /**
  * headers: data to add to the http header. format {key: value, key: value...}
  * params: key/value data to add to http body format {key: value, key: value...}
@@ -38,12 +40,14 @@ global.String.prototype.doDelete = function (params) {
   return FetchUrl('DELETE', ContentType.Json, this, {}, params)
 }
 
-const FetchUrl = async (method = 'POST', contentType = ContentType.Json, requestUrl, headers = {}, params = {}) => {
+const FetchUrl = async (method = 'POST', contentType = ContentType.Json, uri, headers = {}, params = {}) => {
+  let requestUrl = ''
   if (Utility.isNil(params)) {
     params = {}
   }
 
   if (method === 'GET') {
+    requestUrl = '{0}{1}'.format(urlHost, uri)
     requestUrl = encodeURI('{0}{1}'.format(requestUrl, buildBody('?', params)))
   }
 

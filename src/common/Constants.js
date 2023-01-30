@@ -6,4 +6,5 @@ global.appConfig = {
   appVersion: Config.APP_VERSION,
   appName: Config.APP_NAME,
   appId: Config.APP_ID,
+  urlHost: Config.urlHost,
 }
