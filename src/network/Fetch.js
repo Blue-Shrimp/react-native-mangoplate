@@ -64,7 +64,7 @@ const FetchUrl = async (method = 'POST', contentType = ContentType.Json, uri, he
       }
     })
     .catch(error => {
-      return Promise.reject(error?.result)
+      return Promise.reject(error?.message)
     })
 }
 

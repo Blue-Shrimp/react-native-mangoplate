@@ -19,6 +19,7 @@
     "make-apk:prd": "cd android && ./gradlew app:assembleProductRelease && cd .."
   },
   "dependencies": {
+    "@react-navigation/bottom-tabs": "^6.5.5",
     "@react-navigation/native": "^6.1.1",
     "@react-navigation/stack": "^6.3.10",
     "@reduxjs/toolkit": "^1.9.1",

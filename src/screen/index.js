@@ -1,3 +1,3 @@
-import HomeScreen from './HomeScreen'
+import TabNavigation from './TabNavigation'
 
-export { HomeScreen }
+export { TabNavigation }
