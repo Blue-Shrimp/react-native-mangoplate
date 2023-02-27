@@ -3,6 +3,7 @@ import { StyleSheet, Text, Image } from 'react-native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { default as MainScreen } from '@screens/main/MainScreen'
 import { default as PickScreen } from '@screens/pick/PickScreen'
+import { default as PlusModalScreen } from '@screens/plusModal/PlusModalScreen'
 import { default as NewsScreen } from '@screens/news/NewsScreen'
 import { default as MypageScreen } from '@screens/mypage/MypageScreen'
 
@@ -18,6 +19,11 @@ const bottomTabArray = [
     label: '망고픽',
     activeImage: require('@images/pickActive.png'),
     image: require('@images/pick.png'),
+  },
+  {
+    label: '플러스',
+    activeImage: require('@images/addBtn.png'),
+    image: require('@images/addBtn.png'),
   },
   {
     label: '소식',
@@ -38,15 +44,22 @@ const TabNavigation = () => {
       seq = 0
     } else if (route.name === '망고픽') {
       seq = 1
-    } else if (route.name === '소식') {
+    } else if (route.name === '플러스') {
       seq = 2
-    } else if (route.name === '내정보') {
+    } else if (route.name === '소식') {
       seq = 3
+    } else if (route.name === '내정보') {
+      seq = 4
     }
-    return <Image source={focused ? bottomTabArray[seq].activeImage : bottomTabArray[seq].image} style={styles.tabIcon} />
+    return (
+      <Image source={focused ? bottomTabArray[seq].activeImage : bottomTabArray[seq].image} style={seq === 2 ? styles.tabPlusIcon : styles.tabIcon} />
+    )
   }
 
   const tabLabel = (focused, color, route) => {
+    if (route.name === '플러스') {
+      return
+    }
     return <Text style={{ color: focused ? '#ef8835' : color, fontSize: 11 }}>{route.name}</Text>
   }
 
@@ -64,6 +77,7 @@ const TabNavigation = () => {
       })}>
       <Tab.Screen name="맛집찾기" component={MainScreen} />
       <Tab.Screen name="망고픽" component={PickScreen} />
+      <Tab.Screen name="플러스" component={PlusModalScreen} />
       <Tab.Screen name="소식" component={NewsScreen} />
       <Tab.Screen name="내정보" component={MypageScreen} />
     </Tab.Navigator>
@@ -71,6 +85,7 @@ const TabNavigation = () => {
 }
 
 const styles = StyleSheet.create({
+  tabPlusIcon: { width: 38, height: 38 },
   tabIcon: { width: 28, height: 28 },
 })
 

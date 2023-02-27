@@ -1,3 +1,3 @@
-import MypageScreen from './PickScreen'
+import MypageScreen from './MypageScreen'
 
 export { MypageScreen }
