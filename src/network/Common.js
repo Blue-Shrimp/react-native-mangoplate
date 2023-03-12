@@ -9,6 +9,9 @@ const URI = {
     mock: mock.login,
     useMock: true,
   },
+  Main: {
+    mainList: '/mobile/mainList',
+  },
 }
 
 export { URI }

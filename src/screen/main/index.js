@@ -1,3 +1,3 @@
-import MainScreen from './MainScreen'
+import MainView from './MainView'
 
-export { MainScreen }
+export { MainView }

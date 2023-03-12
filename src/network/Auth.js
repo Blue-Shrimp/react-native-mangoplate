@@ -1,9 +1,6 @@
 import { URI } from './Common.js'
 
 export async function login(params = {}) {
-  if (URI.Auth.useMock) {
-    return await Promise.resolve(URI.Auth.mock)
-  }
   return await URI.Auth.login.Get(params)
 }
 

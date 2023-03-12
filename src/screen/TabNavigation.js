@@ -1,7 +1,7 @@
 import React from 'react'
 import { StyleSheet, Text, Image } from 'react-native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { default as MainScreen } from '@screens/main/MainScreen'
+import { default as MainView } from '@screens/main/MainView'
 import { default as PickScreen } from '@screens/pick/PickScreen'
 import { default as PlusModalScreen } from '@screens/plusModal/PlusModalScreen'
 import { default as NewsScreen } from '@screens/news/NewsScreen'
@@ -75,7 +75,7 @@ const TabNavigation = () => {
           return tabLabel(focused, color, route)
         },
       })}>
-      <Tab.Screen name="맛집찾기" component={MainScreen} />
+      <Tab.Screen name="맛집찾기" component={MainView} />
       <Tab.Screen name="망고픽" component={PickScreen} />
       <Tab.Screen name="플러스" component={PlusModalScreen} />
       <Tab.Screen name="소식" component={NewsScreen} />
