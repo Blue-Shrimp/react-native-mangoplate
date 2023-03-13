@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, View, SafeAreaView, Text, FlatList, Image } from 'react-native'
+import { StyleSheet, View, SafeAreaView, Text, Image, ScrollView, Dimensions } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { states as mainStates, actions as mainActions } from './state'
@@ -27,27 +27,44 @@ const MainView = ({ navigation }) => {
     )
   }
 
-  const _list = item => {
-    return (
-      <View>
-        <Image style={{ width: 200, height: 200 }} source={{ uri: item.item.imagesRestaurants[0]?.imageUrl }} />
-        <View style={{ flexDirection: 'row' }}>
-          <Text>{item.item.name}</Text>
-          <Text> {item.item.avgRating}</Text>
-        </View>
-        <Text>{item.item.region.regionName}</Text>
-        <Text>리뷰수 : {item.item.cnt}</Text>
-      </View>
-    )
+  const _list = () => {
+    let views = mainList?.reduce((result = [], item, index) => {
+      result.push(
+        <View style={{ width: Dimensions.get('window').width / 2 - 15, marginRight: 10, marginTop: 20 }}>
+          <Image style={{ height: 200 }} source={{ uri: item.imagesRestaurants[0]?.imageUrl }} />
+          <View style={{ flexDirection: 'row' }}>
+            <Text>{item.name}</Text>
+            <Text> {item.avgRating}</Text>
+          </View>
+          <Text>{item.region.regionName}</Text>
+          <Text>리뷰수 : {item.cnt}</Text>
+        </View>,
+      )
+      return result
+    }, [])
+    return <View style={{ flexDirection: 'row', flexWrap: 'wrap', flexGrow: 1, flexShrink: 1 }}>{views}</View>
+  }
+
+  const _isCloseToBottom = ({ layoutMeasurement, contentOffset, contentSize }) => {
+    const paddingToBottom = 34
+    return layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom
   }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        {/* <Text style={{ fontSize: 20, fontWeight: 'bold' }}>리뷰순</Text>
-        <FlatList data={list?.topCount} renderItem={_list} keyExtractor={(item, index) => index.toString()} /> */}
-        <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 30 }}>평점순</Text>
-        <FlatList data={mainList} renderItem={_list} keyExtractor={(item, index) => index.toString()} />
+        <ScrollView
+          indicatorStyle="black"
+          style={{ marginLeft: 10 }}
+          onScrollEndDrag={({ nativeEvent }) => {
+            if (_isCloseToBottom(nativeEvent)) {
+              console.log('mainList.length : ', mainList.length)
+              console.log('pageInfo ; ', pageInfo)
+            }
+          }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 30 }}>평점순</Text>
+          {_list()}
+        </ScrollView>
       </View>
     </SafeAreaView>
   )
