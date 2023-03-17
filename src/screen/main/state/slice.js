@@ -37,8 +37,13 @@ const reducers = {
     let { type, data } = payload
     switch (type) {
       case 'fetchMainFoodList':
-        state.mainList = data.content
-        state.pageInfo = data.pageable
+        if (data.number + 1 >= 2) {
+          state.mainList = [...state.mainList, ...data.content]
+          state.pageInfo = { totalRecord: data.totalElements, totalPage: data.totalPages, offset: data.number + 1, limit: data.size }
+        } else {
+          state.mainList = data.content
+          state.pageInfo = { totalRecord: data.totalElements, totalPage: data.totalPages, offset: data.number + 1, limit: data.size }
+        }
         break
     }
     state.loading = false
@@ -46,7 +51,7 @@ const reducers = {
 
   onError: (state, { payload }) => {
     state.loading = false
-    console.error(payload.result.message)
+    console.error(payload?.result?.message)
   },
 }
 

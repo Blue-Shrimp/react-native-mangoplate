@@ -57,10 +57,12 @@ const FetchUrl = async (method = 'POST', contentType = ContentType.Json, uri, he
     headers: await buildHeader(contentType, headers),
   })
     .then(async response => {
+      const result = await response.json()
       if (response.status === 200) {
-        return response.json()
+        print(requestUrl, params, result)
+        return result
       } else {
-        return response.json()
+        return result
       }
     })
     .catch(error => {
@@ -107,6 +109,29 @@ function buildBody(prefix, params) {
   console.log('===== Network buildBody end =====')
 
   return body
+}
+
+const print = (uri, params, data) => {
+  console.log('========== response start ==========')
+  console.log('uri: ', uri)
+
+  console.log('===== params start =====')
+  Object.entries(params).forEach((item, index) => {
+    console.log('{0}: {1}'.format(item[0], item[1]))
+  })
+  console.log('===== params end =====')
+
+  console.log('=================================')
+
+  console.log('========== data start ==========')
+  if (Utility.isNil(data)) {
+    console.log('========== data is null or not exist ==========')
+  } else {
+    console.log('========== {0} =========='.format(JSON.stringify(data)))
+  }
+  console.log('========== data end ==========')
+
+  console.log('========== response end ==========')
 }
 
 global.String.prototype.format = function () {

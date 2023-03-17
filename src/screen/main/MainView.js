@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { StyleSheet, View, SafeAreaView, Text, Image, ScrollView, Dimensions } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -7,7 +7,7 @@ import { states as mainStates, actions as mainActions } from './state'
 const MainView = ({ navigation }) => {
   const dispatch = useDispatch()
   const { mainList, pageInfo, loading } = useSelector(mainStates)
-  const [list, setList] = useState({})
+  const page = useRef(1)
 
   useEffect(() => {
     _fetchMainFoodList()
@@ -21,16 +21,17 @@ const MainView = ({ navigation }) => {
       mainActions.fetchMainFoodList({
         params: {
           guBun: filter,
-          curPage: 1,
+          curPage: page.current,
         },
       }),
     )
+    page.current = page.current + 1
   }
 
   const _list = () => {
     let views = mainList?.reduce((result = [], item, index) => {
       result.push(
-        <View style={{ width: Dimensions.get('window').width / 2 - 15, marginRight: 10, marginTop: 20 }}>
+        <View key={index} style={{ width: Dimensions.get('window').width / 2 - 15, marginRight: 10, marginTop: 20 }}>
           <Image style={{ height: 200 }} source={{ uri: item.imagesRestaurants[0]?.imageUrl }} />
           <View style={{ flexDirection: 'row' }}>
             <Text>{item.name}</Text>
@@ -60,6 +61,9 @@ const MainView = ({ navigation }) => {
             if (_isCloseToBottom(nativeEvent)) {
               console.log('mainList.length : ', mainList.length)
               console.log('pageInfo ; ', pageInfo)
+              if (mainList.length >= 4 && pageInfo.totalPage >= page.current) {
+                _fetchMainFoodList()
+              }
             }
           }}>
           <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 30 }}>평점순</Text>
