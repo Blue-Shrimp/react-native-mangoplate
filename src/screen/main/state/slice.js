@@ -5,6 +5,20 @@ export const sliceName = 'main'
 const initialState = {
   mainList: [],
   pageInfo: {},
+  carousel: [
+    {
+      title: '신림 맛집 베스트 25곳',
+      image: require('@images/carousel1.jpg'),
+    },
+    {
+      title: '사당 맛집 베스트 25곳',
+      image: require('@images/carousel2.jpg'),
+    },
+    {
+      title: '강남 맛집 베스트 25곳',
+      image: require('@images/carousel3.jpg'),
+    },
+  ],
   loading: false,
   error: {
     code: '200',
@@ -19,6 +33,10 @@ const reducers = {
 
   setPageInfo: (state, { payload }) => {
     state.pageInfo = payload
+  },
+
+  setCarousel: (state, { payload }) => {
+    state.carousel = payload
   },
 
   fetchMainFoodList: (state, { payload }) => {

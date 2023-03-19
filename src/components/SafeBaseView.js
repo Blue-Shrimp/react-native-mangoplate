@@ -88,7 +88,8 @@ SafeBaseView.defaultProps = {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'white' },
   titleBar: {
-    marginTop: 0,
+    marginTop: 5,
+    paddingBottom: 5,
     marginHorizontal: 0,
     width: ScreenInfo.width,
     minHeight: 50,

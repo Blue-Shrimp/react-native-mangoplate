@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { StyleSheet, View, SafeAreaView, Text, Image, ScrollView, Dimensions, TouchableOpacity } from 'react-native'
+import { StyleSheet, View, SafeAreaView, Text, Image, ScrollView, TouchableOpacity, ImageBackground } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { SafeBaseView } from '@components'
+import Carousel, { Pagination } from 'react-native-snap-carousel'
 
 import { states as mainStates, actions as mainActions } from './state'
 
 const MainView = ({ navigation }) => {
   const dispatch = useDispatch()
-  const { mainList, pageInfo, loading } = useSelector(mainStates)
+  const { mainList, pageInfo, carousel, loading } = useSelector(mainStates)
   const page = useRef(1)
+  const [activeSlide, setActiveSlide] = useState(0)
 
   useEffect(() => {
     _fetchMainFoodList()
@@ -81,8 +83,8 @@ const MainView = ({ navigation }) => {
   const _list = () => {
     let views = mainList?.reduce((result = [], item, index) => {
       result.push(
-        <View key={index} style={{ width: Dimensions.get('window').width / 2 - 15, marginRight: 10, marginTop: 10 }}>
-          <Image style={{ height: 170 }} source={{ uri: item.imagesRestaurants[0]?.imageUrl }} />
+        <View key={index} style={{ width: ScreenInfo.width / 2 - 15, marginRight: 10, marginTop: 10 }}>
+          <Image style={{ height: 175 }} source={{ uri: item.imagesRestaurants[0]?.imageUrl }} />
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <View style={{ flex: 0.8 }}>
               <Text style={{ fontSize: 15 }} numberOfLines={1}>
@@ -133,6 +135,56 @@ const MainView = ({ navigation }) => {
     </View>,
   ]
 
+  const _carouselView = () => {
+    return (
+      <View style={{ height: ScreenInfo.height / 4 }}>
+        <Carousel
+          // ref={(c) => { this._carousel = c; }}
+          data={carousel}
+          renderItem={_renderItem}
+          sliderWidth={ScreenInfo.width}
+          itemWidth={ScreenInfo.width}
+          onSnapToItem={index => {
+            setActiveSlide(index)
+          }}
+          autoplay={true}
+          autoplayDelay={2000}
+          loop={true}
+        />
+        <Pagination
+          dotsLength={carousel.length}
+          activeDotIndex={activeSlide}
+          containerStyle={{ position: 'absolute', bottom: 0, alignSelf: 'center', paddingVertical: 15 }}
+          dotStyle={{
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            marginHorizontal: 8,
+            backgroundColor: '#ef8835',
+          }}
+          inactiveDotStyle={{
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: 'gray',
+          }}
+          inactiveDotOpacity={1}
+          inactiveDotScale={1}
+        />
+      </View>
+    )
+  }
+
+  const _renderItem = ({ item, index }) => {
+    return (
+      <View style={{ flex: 1 }}>
+        <ImageBackground resizeMode={'stretch'} source={item.image} style={{ flex: 1 }}>
+          <Text style={{ fontSize: 30, color: 'white', fontWeight: 'bold' }}>{item?.title}</Text>
+        </ImageBackground>
+      </View>
+    )
+  }
+
   return (
     <SafeBaseView
       style={{ flex: 1 }}
@@ -150,6 +202,7 @@ const MainView = ({ navigation }) => {
               }
             }
           }}>
+          {_carouselView()}
           {_filterView()}
           {_list()}
         </ScrollView>
