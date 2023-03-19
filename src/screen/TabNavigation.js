@@ -52,7 +52,11 @@ const TabNavigation = () => {
       seq = 4
     }
     return (
-      <Image source={focused ? bottomTabArray[seq].activeImage : bottomTabArray[seq].image} style={seq === 2 ? styles.tabPlusIcon : styles.tabIcon} />
+      <Image
+        resizeMode={'stretch'}
+        source={focused ? bottomTabArray[seq].activeImage : bottomTabArray[seq].image}
+        style={seq === 2 ? styles.tabPlusIcon : styles.tabIcon}
+      />
     )
   }
 

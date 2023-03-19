@@ -11,6 +11,7 @@ import { default as TabNavigation } from '@screens/TabNavigation'
 
 import '@common/Constants'
 import '@network/Fetch'
+import '@common/DeviceInfo'
 
 const App = () => {
   const Stack = createStackNavigator()
