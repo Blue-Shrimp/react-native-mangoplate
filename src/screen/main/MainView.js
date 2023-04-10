@@ -3,6 +3,8 @@ import { StyleSheet, View, SafeAreaView, Text, Image, ScrollView, TouchableOpaci
 import { useDispatch, useSelector } from 'react-redux'
 import { SafeBaseView } from '@components'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
+import Animated from 'react-native-reanimated'
+import BottomSheet from '@gorhom/bottom-sheet'
 
 import { states as mainStates, actions as mainActions } from './state'
 
@@ -11,6 +13,8 @@ const MainView = ({ navigation }) => {
   const { mainList, pageInfo, carousel, loading } = useSelector(mainStates)
   const page = useRef(1)
   const [activeSlide, setActiveSlide] = useState(0)
+  // ref
+  const sheetRef = useRef(null)
 
   useEffect(() => {
     _fetchMainFoodList()
@@ -71,6 +75,9 @@ const MainView = ({ navigation }) => {
               height: 30,
               justifyContent: 'center',
               marginLeft: 10,
+            }}
+            onPress={() => {
+              sheetRef.current.snapToIndex(0)
             }}>
             <Image source={require('@images/filter.png')} style={{ width: 18, height: 18, alignSelf: 'center' }}></Image>
             <Text style={{ color: 'gray', fontSize: 13, marginLeft: 5 }}>필터</Text>
@@ -185,29 +192,60 @@ const MainView = ({ navigation }) => {
     )
   }
 
-  return (
-    <SafeBaseView
-      style={{ flex: 1 }}
-      hasTitleBar={true}
-      navigationBarOptions={{ skipLeft: false, leftButtons: _leftButtons(), skipRight: false, rightButtons: _rightButtons() }}>
-      <View style={styles.container}>
-        <ScrollView
-          indicatorStyle="black"
-          onScrollEndDrag={({ nativeEvent }) => {
-            if (_isCloseToBottom(nativeEvent)) {
-              console.log('mainList.length : ', mainList.length)
-              console.log('pageInfo ; ', pageInfo)
-              if (mainList.length >= 4 && pageInfo.totalPage >= page.current) {
-                _fetchMainFoodList()
-              }
-            }
-          }}>
-          {_carouselView()}
-          {_filterView()}
-          {_list()}
-        </ScrollView>
+  const _gubunContent = () => {
+    return (
+      <View
+        style={{
+          backgroundColor: 'white',
+          height: 300,
+        }}>
+        <Image source={require('@images/downArrow.png')} style={{ width: 15, height: 15, marginLeft: 5 }}></Image>
+        <View>
+          <Text>정렬</Text>
+        </View>
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ height: 10, borderRadius: 20 }}>
+            <Text>평점순</Text>
+          </View>
+          <View style={{ height: 10, borderRadius: 20 }}>
+            <Text>리뷰순</Text>
+          </View>
+          <View style={{ height: 10, borderRadius: 20 }}>
+            <Text>거리순</Text>
+          </View>
+        </View>
       </View>
-    </SafeBaseView>
+    )
+  }
+
+  return (
+    <>
+      <SafeBaseView
+        style={{ flex: 1 }}
+        hasTitleBar={true}
+        navigationBarOptions={{ skipLeft: false, leftButtons: _leftButtons(), skipRight: false, rightButtons: _rightButtons() }}>
+        <View style={styles.container}>
+          <ScrollView
+            indicatorStyle="black"
+            onScrollEndDrag={({ nativeEvent }) => {
+              if (_isCloseToBottom(nativeEvent)) {
+                console.log('mainList.length : ', mainList.length)
+                console.log('pageInfo ; ', pageInfo)
+                if (mainList.length >= 4 && pageInfo.totalPage >= page.current) {
+                  _fetchMainFoodList()
+                }
+              }
+            }}>
+            {_carouselView()}
+            {_filterView()}
+            {_list()}
+          </ScrollView>
+        </View>
+      </SafeBaseView>
+      <BottomSheet ref={sheetRef} index={-1} snapPoints={['20%']} enablePanDownToClose={true}>
+        {_gubunContent()}
+      </BottomSheet>
+    </>
   )
 }
 

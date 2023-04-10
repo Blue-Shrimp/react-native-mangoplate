@@ -19,6 +19,7 @@
     "make-apk:prd": "cd android && ./gradlew app:assembleProductRelease && cd .."
   },
   "dependencies": {
+    "@gorhom/bottom-sheet": "^4",
     "@react-navigation/bottom-tabs": "^6.5.5",
     "@react-navigation/native": "^6.1.1",
     "@react-navigation/stack": "^6.3.10",
