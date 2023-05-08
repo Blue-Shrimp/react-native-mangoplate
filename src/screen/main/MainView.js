@@ -5,6 +5,7 @@ import { SafeBaseView } from '@components'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
 import Animated from 'react-native-reanimated'
 import BottomSheet from '@gorhom/bottom-sheet'
+import { RadioButton } from 'react-native-paper'
 
 import { states as mainStates, actions as mainActions } from './state'
 
@@ -15,6 +16,7 @@ const MainView = ({ navigation }) => {
   const [activeSlide, setActiveSlide] = useState(0)
   // ref
   const sheetRef = useRef(null)
+  const [filterValue, setFilterValue] = useState('avg')
 
   useEffect(() => {
     _fetchMainFoodList()
@@ -24,14 +26,28 @@ const MainView = ({ navigation }) => {
   console.log(pageInfo)
 
   const _fetchMainFoodList = (filter = 'avg') => {
-    dispatch(
-      mainActions.fetchMainFoodList({
-        params: {
-          guBun: filter,
-          curPage: page.current,
-        },
-      }),
-    )
+    if (filter === 'distance') {
+      dispatch(
+        mainActions.fetchMainFoodList({
+          params: {
+            guBun: filter,
+            curPage: page.current,
+            distanceLimit: 1000,
+            longitude: 127.02751,
+            latitude: 37.498095,
+          },
+        }),
+      )
+    } else {
+      dispatch(
+        mainActions.fetchMainFoodList({
+          params: {
+            guBun: filter,
+            curPage: page.current,
+          },
+        }),
+      )
+    }
     page.current = page.current + 1
   }
 
@@ -46,8 +62,12 @@ const MainView = ({ navigation }) => {
           borderBottomWidth: 1,
           borderBottomColor: 'lightgray',
         }}>
-        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 10 }}>
-          <Text style={{ color: 'gray' }}>평점순</Text>
+        <TouchableOpacity
+          style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 10 }}
+          onPress={() => {
+            sheetRef.current.snapToIndex(0)
+          }}>
+          <Text style={{ color: 'gray' }}>{filterValue === 'avg' ? '평점순' : filterValue === 'cnt' ? '리뷰순' : '거리순'}</Text>
           <Image source={require('@images/downArrow.png')} style={{ width: 7, height: 7, marginLeft: 5 }}></Image>
         </TouchableOpacity>
         <View style={{ flexDirection: 'row', marginRight: 10 }}>
@@ -62,7 +82,7 @@ const MainView = ({ navigation }) => {
               justifyContent: 'center',
             }}>
             <Image source={require('@images/gps.png')} style={{ width: 15, height: 15, alignSelf: 'center' }}></Image>
-            <Text style={{ color: '#ef8835', fontSize: 13, marginLeft: 5 }}>500m</Text>
+            <Text style={{ color: '#ef8835', fontSize: 13, marginLeft: 5 }}>1km</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -75,9 +95,6 @@ const MainView = ({ navigation }) => {
               height: 30,
               justifyContent: 'center',
               marginLeft: 10,
-            }}
-            onPress={() => {
-              sheetRef.current.snapToIndex(0)
             }}>
             <Image source={require('@images/filter.png')} style={{ width: 18, height: 18, alignSelf: 'center' }}></Image>
             <Text style={{ color: 'gray', fontSize: 13, marginLeft: 5 }}>필터</Text>
@@ -97,7 +114,9 @@ const MainView = ({ navigation }) => {
               <Text style={{ fontSize: 15 }} numberOfLines={1}>
                 {index + 1}. {item.name}
               </Text>
-              <Text style={{ color: 'gray', fontSize: 13, marginTop: 5 }}>{item.region.regionName} 500m</Text>
+              <Text style={{ color: 'gray', fontSize: 13, marginTop: 5 }}>
+                {item.region.regionName} {filterValue === 'distance' ? item.distanceGap : ''}
+              </Text>
               <View style={{ flexDirection: 'row' }}>
                 <Image source={require('@images/reviewCnt.png')} style={{ width: 10, height: 10, alignSelf: 'center' }}></Image>
                 <Text style={{ color: 'gray', fontSize: 13 }}> {item.cnt}</Text>
@@ -198,21 +217,80 @@ const MainView = ({ navigation }) => {
         style={{
           backgroundColor: 'white',
           height: 300,
+          padding: 10,
         }}>
-        <Image source={require('@images/downArrow.png')} style={{ width: 15, height: 15, marginLeft: 5 }}></Image>
-        <View>
-          <Text>정렬</Text>
+        <TouchableOpacity
+          onPress={() => {
+            sheetRef.current.close()
+          }}>
+          <Image source={require('@images/downArrow.png')} style={{ width: 20, height: 20, marginLeft: 5 }}></Image>
+        </TouchableOpacity>
+        <View style={{ alignSelf: 'center', marginBottom: 20 }}>
+          <Text style={{ fontSize: 17 }}>정렬</Text>
         </View>
-        <View style={{ flexDirection: 'row' }}>
-          <View style={{ height: 10, borderRadius: 20 }}>
-            <Text>평점순</Text>
-          </View>
-          <View style={{ height: 10, borderRadius: 20 }}>
-            <Text>리뷰순</Text>
-          </View>
-          <View style={{ height: 10, borderRadius: 20 }}>
-            <Text>거리순</Text>
-          </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+          <TouchableOpacity
+            style={{
+              width: 80,
+              height: 40,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: filterValue === 'avg' ? 2 : 0,
+              borderRadius: 20,
+              borderColor: '#ef8835',
+            }}
+            onPress={() => {
+              page.current = 1
+              dispatch(mainActions.setMainList([]))
+              _fetchMainFoodList('avg')
+              setFilterValue('avg')
+              sheetRef.current.close()
+            }}>
+            <Text style={{ color: filterValue === 'avg' ? '#ef8835' : 'lightgray' }}>평점순</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              width: 80,
+              height: 40,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: filterValue === 'cnt' ? 2 : 0,
+              borderRadius: 20,
+              borderColor: '#ef8835',
+              marginLeft: 20,
+            }}
+            onPress={() => {
+              page.current = 1
+              dispatch(mainActions.setMainList([]))
+              _fetchMainFoodList('cnt')
+              setFilterValue('cnt')
+              sheetRef.current.close()
+            }}>
+            <Text style={{ color: filterValue === 'cnt' ? '#ef8835' : 'lightgray' }}>리뷰순</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              width: 80,
+              height: 40,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: filterValue === 'distance' ? 2 : 0,
+              borderRadius: 20,
+              borderColor: '#ef8835',
+              marginLeft: 20,
+            }}
+            onPress={() => {
+              page.current = 1
+              dispatch(mainActions.setMainList([]))
+              _fetchMainFoodList('distance')
+              setFilterValue('distance')
+              sheetRef.current.close()
+            }}>
+            <Text style={{ color: filterValue === 'distance' ? '#ef8835' : 'lightgray' }}>거리순</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ alignItems: 'flex-end', marginTop: 10 }}>
+          <Text style={{ color: '#ef8835' }}>*거리순은 위치가 켜져있을 때만 가능</Text>
         </View>
       </View>
     )
@@ -224,7 +302,11 @@ const MainView = ({ navigation }) => {
         style={{ flex: 1 }}
         hasTitleBar={true}
         navigationBarOptions={{ skipLeft: false, leftButtons: _leftButtons(), skipRight: false, rightButtons: _rightButtons() }}>
-        <View style={styles.container}>
+        <View
+          style={styles.container}
+          onTouchStart={() => {
+            sheetRef.current.close()
+          }}>
           <ScrollView
             indicatorStyle="black"
             onScrollEndDrag={({ nativeEvent }) => {
@@ -232,7 +314,7 @@ const MainView = ({ navigation }) => {
                 console.log('mainList.length : ', mainList.length)
                 console.log('pageInfo ; ', pageInfo)
                 if (mainList.length >= 4 && pageInfo.totalPage >= page.current) {
-                  _fetchMainFoodList()
+                  _fetchMainFoodList(filterValue)
                 }
               }
             }}>
@@ -242,7 +324,7 @@ const MainView = ({ navigation }) => {
           </ScrollView>
         </View>
       </SafeBaseView>
-      <BottomSheet ref={sheetRef} index={-1} snapPoints={['20%']} enablePanDownToClose={true}>
+      <BottomSheet ref={sheetRef} index={-1} snapPoints={['18%']} enablePanDownToClose={true} handleStyle={{ display: 'none' }}>
         {_gubunContent()}
       </BottomSheet>
     </>
