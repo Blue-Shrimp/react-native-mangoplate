@@ -4,11 +4,12 @@ import { useDispatch, useSelector } from 'react-redux'
 import { SafeBaseView } from '@components'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
 import Animated from 'react-native-reanimated'
-import BottomSheet from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetModal, BottomSheetModalProvider, BottomSheetBackdrop } from '@gorhom/bottom-sheet'
 import StepIndicator from 'react-native-step-indicator'
 
 import { states as mainStates, actions as mainActions } from './state'
 
+const distanceMeter = [100, 300, 500, 1000, 3000]
 const distanceStep = ['100m', '300m', '500m', '1km', '3km']
 const customStyles = {
   stepIndicatorSize: 10,
@@ -51,14 +52,14 @@ const MainView = ({ navigation }) => {
   console.log(mainList)
   console.log(pageInfo)
 
-  const _fetchMainFoodList = (filter = 'avg') => {
+  const _fetchMainFoodList = (filter = 'avg', distance = distanceValue) => {
     if (filter === 'distance') {
       dispatch(
         mainActions.fetchMainFoodList({
           params: {
             guBun: filter,
             curPage: page.current,
-            distanceLimit: 1000,
+            distanceLimit: distanceMeter[distance],
             longitude: 127.02751,
             latitude: 37.498095,
           },
@@ -70,6 +71,9 @@ const MainView = ({ navigation }) => {
           params: {
             guBun: filter,
             curPage: page.current,
+            distanceLimit: distanceMeter[distance],
+            longitude: 127.02751,
+            latitude: 37.498095,
           },
         }),
       )
@@ -144,7 +148,7 @@ const MainView = ({ navigation }) => {
                 {index + 1}. {item.name}
               </Text>
               <Text style={{ color: 'gray', fontSize: 13, marginTop: 5 }}>
-                {item.region.regionName} {filterValue === 'distance' ? item.distanceGap : ''}
+                {item.region.regionName} {item.distanceGap}
               </Text>
               <View style={{ flexDirection: 'row' }}>
                 <Image source={require('@images/reviewCnt.png')} style={{ width: 10, height: 10, alignSelf: 'center' }}></Image>
@@ -353,6 +357,9 @@ const MainView = ({ navigation }) => {
             labels={distanceStep}
             onPress={distance => {
               setDistanceValue(distance)
+              page.current = 1
+              dispatch(mainActions.setMainList([]))
+              _fetchMainFoodList(filterValue, distance)
               distanceSheetRef.current.close()
             }}
           />
@@ -367,12 +374,7 @@ const MainView = ({ navigation }) => {
         style={{ flex: 1 }}
         hasTitleBar={true}
         navigationBarOptions={{ skipLeft: false, leftButtons: _leftButtons(), skipRight: false, rightButtons: _rightButtons() }}>
-        <View
-          style={styles.container}
-          onTouchStart={() => {
-            gubunSheetRef.current.close()
-            distanceSheetRef.current.close()
-          }}>
+        <View style={styles.container}>
           <ScrollView
             indicatorStyle="black"
             onScrollEndDrag={({ nativeEvent }) => {
@@ -390,10 +392,26 @@ const MainView = ({ navigation }) => {
           </ScrollView>
         </View>
       </SafeBaseView>
-      <BottomSheet ref={gubunSheetRef} index={-1} snapPoints={['18%']} enablePanDownToClose={true} handleStyle={{ display: 'none' }}>
+      <BottomSheet
+        ref={gubunSheetRef}
+        index={-1}
+        snapPoints={['18%']}
+        enablePanDownToClose={true}
+        handleStyle={{ display: 'none' }}
+        backdropComponent={backdropProps => (
+          <BottomSheetBackdrop {...backdropProps} enableTouchThrough={true} appearsOnIndex={0} disappearsOnIndex={-1} />
+        )}>
         {_gubunContent()}
       </BottomSheet>
-      <BottomSheet ref={distanceSheetRef} index={-1} snapPoints={['18%']} enablePanDownToClose={true} handleStyle={{ display: 'none' }}>
+      <BottomSheet
+        ref={distanceSheetRef}
+        index={-1}
+        snapPoints={['18%']}
+        enablePanDownToClose={true}
+        handleStyle={{ display: 'none' }}
+        backdropComponent={backdropProps => (
+          <BottomSheetBackdrop {...backdropProps} enableTouchThrough={true} appearsOnIndex={0} disappearsOnIndex={-1} />
+        )}>
         {_distanceContent()}
       </BottomSheet>
     </>
