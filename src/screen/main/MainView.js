@@ -1,14 +1,89 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { StyleSheet, View, SafeAreaView, Text, Image, ScrollView, TouchableOpacity, ImageBackground } from 'react-native'
+import { StyleSheet, View, SafeAreaView, Text, Image, ScrollView, TouchableOpacity, ImageBackground, FlatList } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { SafeBaseView } from '@components'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
 import Animated from 'react-native-reanimated'
 import BottomSheet, { BottomSheetModal, BottomSheetModalProvider, BottomSheetBackdrop } from '@gorhom/bottom-sheet'
 import StepIndicator from 'react-native-step-indicator'
+import { Utility } from '@common'
 
 import { states as mainStates, actions as mainActions } from './state'
 
+const regions = [
+  {
+    id: '0',
+    title: '전체',
+  },
+  {
+    id: '1',
+    title: '서울시',
+  },
+  {
+    id: '2',
+    title: '경기도',
+  },
+  {
+    id: '3',
+    title: '인천',
+  },
+  {
+    id: '4',
+    title: '대구',
+  },
+  {
+    id: '5',
+    title: '부산',
+  },
+  {
+    id: '6',
+    title: '제주',
+  },
+  {
+    id: '7',
+    title: '대전',
+  },
+  {
+    id: '8',
+    title: '광주',
+  },
+  {
+    id: '9',
+    title: '강원도',
+  },
+  {
+    id: '10',
+    title: '경상남도',
+  },
+  {
+    id: '11',
+    title: '경상북도',
+  },
+  {
+    id: '12',
+    title: '전라남도',
+  },
+  {
+    id: '13',
+    title: '전라북도',
+  },
+  {
+    id: '14',
+    title: '충청남도',
+  },
+  {
+    id: '15',
+    title: '충청북도',
+  },
+  {
+    id: '16',
+    title: '울산',
+  },
+  {
+    id: '17',
+    title: '세종',
+  },
+]
 const distanceMeter = [100, 300, 500, 1000, 3000]
 const distanceStep = ['100m', '300m', '500m', '1km', '3km']
 const customStyles = {
@@ -37,13 +112,15 @@ const customStyles = {
 
 const MainView = ({ navigation }) => {
   const dispatch = useDispatch()
-  const { mainList, pageInfo, carousel, loading } = useSelector(mainStates)
+  const { mainList, pageInfo, carousel, selectedRegions, loading } = useSelector(mainStates)
   const page = useRef(1)
   const [activeSlide, setActiveSlide] = useState(0)
   const gubunSheetRef = useRef(null)
   const [filterValue, setFilterValue] = useState('avg')
   const distanceSheetRef = useRef(null)
   const [distanceValue, setDistanceValue] = useState(3)
+  const regionSheetRef = useRef(null)
+  const [selectedCurrentRegions, setSelectedCurrentRegions] = useState([])
 
   useEffect(() => {
     _fetchMainFoodList()
@@ -52,7 +129,11 @@ const MainView = ({ navigation }) => {
   console.log(mainList)
   console.log(pageInfo)
 
-  const _fetchMainFoodList = (filter = 'avg', distance = distanceValue) => {
+  const _fetchMainFoodList = (
+    filter = 'avg',
+    distance = distanceValue,
+    region = selectedRegions.length > 0 ? (selectedRegions[0].title === '전체' ? '' : selectedRegions[0].title) : '',
+  ) => {
     if (filter === 'distance') {
       dispatch(
         mainActions.fetchMainFoodList({
@@ -62,6 +143,7 @@ const MainView = ({ navigation }) => {
             distanceLimit: distanceMeter[distance],
             longitude: 127.02751,
             latitude: 37.498095,
+            keyword: region,
           },
         }),
       )
@@ -74,6 +156,7 @@ const MainView = ({ navigation }) => {
             distanceLimit: distanceMeter[distance],
             longitude: 127.02751,
             latitude: 37.498095,
+            keyword: region,
           },
         }),
       )
@@ -173,10 +256,22 @@ const MainView = ({ navigation }) => {
   }
 
   const _leftButtons = () => [
-    <TouchableOpacity style={{ marginLeft: 15 }} key={0}>
+    <TouchableOpacity
+      style={{ marginLeft: 15 }}
+      key={0}
+      onPress={() => {
+        setSelectedCurrentRegions(selectedRegions)
+        regionSheetRef.current.snapToIndex(0)
+      }}>
       <Text>지금 보고 있는 지역은</Text>
       <View style={{ flexDirection: 'row' }}>
-        <Text style={{ fontSize: 20, fontWeight: '500' }}>관악구</Text>
+        <Text style={{ fontSize: 20, fontWeight: '500' }}>
+          {selectedRegions?.length < 1
+            ? '관악구'
+            : selectedRegions?.length > 1
+            ? selectedRegions[selectedRegions.length - 1]?.title + ' 외 ' + (selectedRegions.length - 1) + '곳'
+            : selectedRegions[0]?.title}
+        </Text>
         <Image source={require('@images/downArrow.png')} style={{ width: 7, height: 7, alignSelf: 'center', marginLeft: 5 }}></Image>
       </View>
     </TouchableOpacity>,
@@ -255,10 +350,11 @@ const MainView = ({ navigation }) => {
         <TouchableOpacity
           onPress={() => {
             gubunSheetRef.current.close()
-          }}>
+          }}
+          style={{ position: 'absolute', top: 10, left: 10 }}>
           <Image source={require('@images/downArrow.png')} style={{ width: 20, height: 20, marginLeft: 5 }}></Image>
         </TouchableOpacity>
-        <View style={{ alignSelf: 'center', marginBottom: 20 }}>
+        <View style={{ alignSelf: 'center', marginVertical: 20 }}>
           <Text style={{ fontSize: 17 }}>정렬</Text>
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
@@ -273,8 +369,7 @@ const MainView = ({ navigation }) => {
               borderColor: '#ef8835',
             }}
             onPress={() => {
-              page.current = 1
-              dispatch(mainActions.setMainList([]))
+              _refreshList()
               _fetchMainFoodList('avg')
               setFilterValue('avg')
               gubunSheetRef.current.close()
@@ -293,8 +388,7 @@ const MainView = ({ navigation }) => {
               marginLeft: 20,
             }}
             onPress={() => {
-              page.current = 1
-              dispatch(mainActions.setMainList([]))
+              _refreshList()
               _fetchMainFoodList('cnt')
               setFilterValue('cnt')
               gubunSheetRef.current.close()
@@ -313,8 +407,7 @@ const MainView = ({ navigation }) => {
               marginLeft: 20,
             }}
             onPress={() => {
-              page.current = 1
-              dispatch(mainActions.setMainList([]))
+              _refreshList()
               _fetchMainFoodList('distance')
               setFilterValue('distance')
               gubunSheetRef.current.close()
@@ -357,8 +450,7 @@ const MainView = ({ navigation }) => {
             labels={distanceStep}
             onPress={distance => {
               setDistanceValue(distance)
-              page.current = 1
-              dispatch(mainActions.setMainList([]))
+              _refreshList()
               _fetchMainFoodList(filterValue, distance)
               distanceSheetRef.current.close()
             }}
@@ -366,6 +458,138 @@ const MainView = ({ navigation }) => {
         </View>
       </View>
     )
+  }
+
+  const _renderContent = () => {
+    return (
+      <>
+        <View style={{ height: 270, marginTop: 10 }}>{_regionContent()}</View>
+        <View style={{ alignItems: 'center' }}>
+          <TouchableOpacity
+            style={{
+              width: 100,
+              height: 35,
+              borderRadius: 20,
+              backgroundColor: selectedCurrentRegions?.length > 0 ? '#ef8835' : 'rgba(52, 52, 52, 0.2)',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: 5,
+            }}
+            disabled={selectedCurrentRegions?.length < 1}
+            onPress={() => {
+              if (selectedCurrentRegions?.length < 1) {
+                return
+              }
+              _refreshList()
+              dispatch(mainActions.setSelectedRegions(selectedCurrentRegions))
+              _fetchMainFoodList(filterValue, distanceValue, selectedCurrentRegions[0]?.title === '전체' ? '' : selectedCurrentRegions[0]?.title)
+              regionSheetRef.current.close()
+            }}>
+            <Text style={{ color: 'white' }}>적용</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          style={{ position: 'absolute', bottom: 20, right: 10 }}
+          onPress={() => {
+            setSelectedCurrentRegions([])
+          }}>
+          <Text style={{ color: selectedCurrentRegions?.length > 0 ? '#ef8835' : 'grey' }}>지우기</Text>
+        </TouchableOpacity>
+      </>
+    )
+  }
+
+  const _regionContent = () => {
+    let views = regions?.reduce((result = [], item, index) => {
+      const isItemSelected = _isSelected(item)
+      result.push(
+        <TouchableOpacity
+          key={index}
+          style={{
+            width: 160,
+            height: 45,
+            borderWidth: 3,
+            borderColor: isItemSelected ? '#ef8835' : 'lightgrey',
+            borderRadius: 20,
+            marginHorizontal: 15,
+            marginVertical: 10,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          onPress={() => {
+            if (item.id === '0') {
+              _onSelectAll()
+            } else {
+              _onSelect(item, isItemSelected)
+            }
+          }}>
+          <Text style={{ color: isItemSelected ? '#ef8835' : 'lightgrey' }}>{item.title}</Text>
+        </TouchableOpacity>,
+      )
+
+      return result
+    }, [])
+
+    return (
+      <ScrollView>
+        <View style={{ justifyContent: 'center', flexDirection: 'row', flexWrap: 'wrap' }}>{views}</View>
+      </ScrollView>
+    )
+  }
+
+  const _isSelected = item => {
+    let selected = selectedCurrentRegions
+    if (Utility.isNil(selected)) {
+      return false
+    }
+
+    return (
+      selected.findIndex(v => {
+        return v.id === item.id
+      }) >= 0
+    )
+  }
+
+  const _isSelectedAll = () => {
+    let selected = Object.assign([], selectedCurrentRegions)
+    return selected.length === regions.length
+  }
+
+  const _onSelectAll = () => {
+    let selected = Object.assign([], selectedCurrentRegions)
+
+    if (_isSelectedAll()) {
+      selected = []
+    } else {
+      selected = regions
+    }
+
+    setSelectedCurrentRegions(selected)
+  }
+
+  const _onSelect = (item, isSelected) => {
+    let selected = Object.assign([], selectedCurrentRegions)
+    if (Utility.isNil(selected)) {
+      selected = []
+    }
+
+    if (isSelected) {
+      let filtered = selected.filter(v => {
+        return v.id !== item.id
+      })
+      selected = [...filtered]
+    } else {
+      let filtered = selected.filter(v => {
+        return v.id !== item.id
+      })
+      selected = [...filtered, { ...item }]
+    }
+    setSelectedCurrentRegions(selected)
+  }
+
+  const _refreshList = () => {
+    page.current = 1
+    dispatch(mainActions.setMainList([]))
   }
 
   return (
@@ -413,6 +637,17 @@ const MainView = ({ navigation }) => {
           <BottomSheetBackdrop {...backdropProps} enableTouchThrough={true} appearsOnIndex={0} disappearsOnIndex={-1} />
         )}>
         {_distanceContent()}
+      </BottomSheet>
+      <BottomSheet
+        ref={regionSheetRef}
+        index={-1}
+        snapPoints={['40%']}
+        enableContentPanningGesture={false}
+        handleStyle={{ display: 'none' }}
+        backdropComponent={backdropProps => (
+          <BottomSheetBackdrop {...backdropProps} enableTouchThrough={true} appearsOnIndex={0} disappearsOnIndex={-1} />
+        )}>
+        {_renderContent()}
       </BottomSheet>
     </>
   )

@@ -19,6 +19,7 @@ const initialState = {
       image: require('@images/carousel3.jpg'),
     },
   ],
+  selectedRegions: [],
   loading: false,
   error: {
     code: '200',
@@ -37,6 +38,10 @@ const reducers = {
 
   setCarousel: (state, { payload }) => {
     state.carousel = payload
+  },
+
+  setSelectedRegions: (state, { payload }) => {
+    state.selectedRegions = payload
   },
 
   fetchMainFoodList: (state, { payload }) => {
