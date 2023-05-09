@@ -5,18 +5,44 @@ import { SafeBaseView } from '@components'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
 import Animated from 'react-native-reanimated'
 import BottomSheet from '@gorhom/bottom-sheet'
-import { RadioButton } from 'react-native-paper'
+import StepIndicator from 'react-native-step-indicator'
 
 import { states as mainStates, actions as mainActions } from './state'
+
+const distanceStep = ['100m', '300m', '500m', '1km', '3km']
+const customStyles = {
+  stepIndicatorSize: 10,
+  currentStepIndicatorSize: 30,
+  separatorStrokeWidth: 2,
+  currentStepStrokeWidth: 4,
+  stepStrokeCurrentColor: '#ef8835',
+  stepStrokeWidth: 2,
+  stepStrokeFinishedColor: '#aaaaaa',
+  stepStrokeUnFinishedColor: '#aaaaaa',
+  separatorFinishedColor: '#aaaaaa',
+  separatorUnFinishedColor: '#aaaaaa',
+  stepIndicatorFinishedColor: '#ffffff',
+  stepIndicatorUnFinishedColor: '#ffffff',
+  stepIndicatorCurrentColor: '#ffffff',
+  stepIndicatorLabelFontSize: 13,
+  currentStepIndicatorLabelFontSize: 13,
+  stepIndicatorLabelCurrentColor: '#ffffff',
+  stepIndicatorLabelFinishedColor: '#ffffff',
+  stepIndicatorLabelUnFinishedColor: '#ffffff',
+  labelColor: '#ffffff',
+  labelSize: 13,
+  currentStepLabelColor: '#ffffff',
+}
 
 const MainView = ({ navigation }) => {
   const dispatch = useDispatch()
   const { mainList, pageInfo, carousel, loading } = useSelector(mainStates)
   const page = useRef(1)
   const [activeSlide, setActiveSlide] = useState(0)
-  // ref
-  const sheetRef = useRef(null)
+  const gubunSheetRef = useRef(null)
   const [filterValue, setFilterValue] = useState('avg')
+  const distanceSheetRef = useRef(null)
+  const [distanceValue, setDistanceValue] = useState(3)
 
   useEffect(() => {
     _fetchMainFoodList()
@@ -65,7 +91,7 @@ const MainView = ({ navigation }) => {
         <TouchableOpacity
           style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 10 }}
           onPress={() => {
-            sheetRef.current.snapToIndex(0)
+            gubunSheetRef.current.snapToIndex(0)
           }}>
           <Text style={{ color: 'gray' }}>{filterValue === 'avg' ? '평점순' : filterValue === 'cnt' ? '리뷰순' : '거리순'}</Text>
           <Image source={require('@images/downArrow.png')} style={{ width: 7, height: 7, marginLeft: 5 }}></Image>
@@ -80,9 +106,12 @@ const MainView = ({ navigation }) => {
               width: 80,
               height: 30,
               justifyContent: 'center',
+            }}
+            onPress={() => {
+              distanceSheetRef.current.snapToIndex(0)
             }}>
             <Image source={require('@images/gps.png')} style={{ width: 15, height: 15, alignSelf: 'center' }}></Image>
-            <Text style={{ color: '#ef8835', fontSize: 13, marginLeft: 5 }}>1km</Text>
+            <Text style={{ color: '#ef8835', fontSize: 13, marginLeft: 5 }}>{distanceStep[distanceValue]}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -221,7 +250,7 @@ const MainView = ({ navigation }) => {
         }}>
         <TouchableOpacity
           onPress={() => {
-            sheetRef.current.close()
+            gubunSheetRef.current.close()
           }}>
           <Image source={require('@images/downArrow.png')} style={{ width: 20, height: 20, marginLeft: 5 }}></Image>
         </TouchableOpacity>
@@ -244,7 +273,7 @@ const MainView = ({ navigation }) => {
               dispatch(mainActions.setMainList([]))
               _fetchMainFoodList('avg')
               setFilterValue('avg')
-              sheetRef.current.close()
+              gubunSheetRef.current.close()
             }}>
             <Text style={{ color: filterValue === 'avg' ? '#ef8835' : 'lightgray' }}>평점순</Text>
           </TouchableOpacity>
@@ -264,7 +293,7 @@ const MainView = ({ navigation }) => {
               dispatch(mainActions.setMainList([]))
               _fetchMainFoodList('cnt')
               setFilterValue('cnt')
-              sheetRef.current.close()
+              gubunSheetRef.current.close()
             }}>
             <Text style={{ color: filterValue === 'cnt' ? '#ef8835' : 'lightgray' }}>리뷰순</Text>
           </TouchableOpacity>
@@ -284,13 +313,49 @@ const MainView = ({ navigation }) => {
               dispatch(mainActions.setMainList([]))
               _fetchMainFoodList('distance')
               setFilterValue('distance')
-              sheetRef.current.close()
+              gubunSheetRef.current.close()
             }}>
             <Text style={{ color: filterValue === 'distance' ? '#ef8835' : 'lightgray' }}>거리순</Text>
           </TouchableOpacity>
         </View>
         <View style={{ alignItems: 'flex-end', marginTop: 10 }}>
           <Text style={{ color: '#ef8835' }}>*거리순은 위치가 켜져있을 때만 가능</Text>
+        </View>
+      </View>
+    )
+  }
+
+  const _distanceContent = () => {
+    return (
+      <View
+        style={{
+          backgroundColor: 'white',
+          height: 300,
+          padding: 10,
+        }}>
+        <TouchableOpacity
+          onPress={() => {
+            distanceSheetRef.current.close()
+          }}
+          style={{ position: 'absolute', top: 10, left: 10 }}>
+          <Image source={require('@images/downArrow.png')} style={{ width: 20, height: 20, marginLeft: 5 }}></Image>
+        </TouchableOpacity>
+        <View style={{ alignSelf: 'center', marginTop: 10 }}>
+          <Text style={{ color: '#ef8835' }}>내 위치에서 검색 반경 선택</Text>
+        </View>
+        <View style={{ alignSelf: 'center' }}>
+          <Text style={{ color: '#ef8835', fontSize: 30 }}>{distanceStep[distanceValue]}</Text>
+        </View>
+        <View style={{ marginTop: 15 }}>
+          <StepIndicator
+            customStyles={customStyles}
+            currentPosition={distanceValue}
+            labels={distanceStep}
+            onPress={distance => {
+              setDistanceValue(distance)
+              distanceSheetRef.current.close()
+            }}
+          />
         </View>
       </View>
     )
@@ -305,7 +370,8 @@ const MainView = ({ navigation }) => {
         <View
           style={styles.container}
           onTouchStart={() => {
-            sheetRef.current.close()
+            gubunSheetRef.current.close()
+            distanceSheetRef.current.close()
           }}>
           <ScrollView
             indicatorStyle="black"
@@ -324,8 +390,11 @@ const MainView = ({ navigation }) => {
           </ScrollView>
         </View>
       </SafeBaseView>
-      <BottomSheet ref={sheetRef} index={-1} snapPoints={['18%']} enablePanDownToClose={true} handleStyle={{ display: 'none' }}>
+      <BottomSheet ref={gubunSheetRef} index={-1} snapPoints={['18%']} enablePanDownToClose={true} handleStyle={{ display: 'none' }}>
         {_gubunContent()}
+      </BottomSheet>
+      <BottomSheet ref={distanceSheetRef} index={-1} snapPoints={['18%']} enablePanDownToClose={true} handleStyle={{ display: 'none' }}>
+        {_distanceContent()}
       </BottomSheet>
     </>
   )
