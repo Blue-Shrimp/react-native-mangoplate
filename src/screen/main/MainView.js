@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { StyleSheet, View, SafeAreaView, Text, Image, ScrollView, TouchableOpacity, ImageBackground, FlatList } from 'react-native'
+import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity, ImageBackground, SectionList } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { SafeBaseView } from '@components'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
@@ -10,80 +10,6 @@ import { Utility } from '@common'
 
 import { states as mainStates, actions as mainActions } from './state'
 
-const regions = [
-  {
-    id: '0',
-    title: '전체',
-  },
-  {
-    id: '1',
-    title: '서울시',
-  },
-  {
-    id: '2',
-    title: '경기도',
-  },
-  {
-    id: '3',
-    title: '인천',
-  },
-  {
-    id: '4',
-    title: '대구',
-  },
-  {
-    id: '5',
-    title: '부산',
-  },
-  {
-    id: '6',
-    title: '제주',
-  },
-  {
-    id: '7',
-    title: '대전',
-  },
-  {
-    id: '8',
-    title: '광주',
-  },
-  {
-    id: '9',
-    title: '강원도',
-  },
-  {
-    id: '10',
-    title: '경상남도',
-  },
-  {
-    id: '11',
-    title: '경상북도',
-  },
-  {
-    id: '12',
-    title: '전라남도',
-  },
-  {
-    id: '13',
-    title: '전라북도',
-  },
-  {
-    id: '14',
-    title: '충청남도',
-  },
-  {
-    id: '15',
-    title: '충청북도',
-  },
-  {
-    id: '16',
-    title: '울산',
-  },
-  {
-    id: '17',
-    title: '세종',
-  },
-]
 const distanceMeter = [100, 300, 500, 1000, 3000]
 const distanceStep = ['100m', '300m', '500m', '1km', '3km']
 const customStyles = {
@@ -112,15 +38,19 @@ const customStyles = {
 
 const MainView = ({ navigation }) => {
   const dispatch = useDispatch()
-  const { mainList, pageInfo, carousel, selectedRegions, loading } = useSelector(mainStates)
+  const { mainList, pageInfo, carousel, regions, selectedRegions, options, initialSelectedOptions, selectedOptions, loading } =
+    useSelector(mainStates)
   const page = useRef(1)
   const [activeSlide, setActiveSlide] = useState(0)
   const gubunSheetRef = useRef(null)
-  const [filterValue, setFilterValue] = useState('avg')
+  const [gubunValue, setGubunValue] = useState('avg')
   const distanceSheetRef = useRef(null)
   const [distanceValue, setDistanceValue] = useState(3)
   const regionSheetRef = useRef(null)
   const [selectedCurrentRegions, setSelectedCurrentRegions] = useState([])
+  const filterSheetRef = useRef(null)
+  const [selectedCurrentOptions, setSelectedCurrentOptions] = useState({})
+  const sectionList = useRef(null)
 
   useEffect(() => {
     _fetchMainFoodList()
@@ -130,11 +60,12 @@ const MainView = ({ navigation }) => {
   console.log(pageInfo)
 
   const _fetchMainFoodList = (
-    filter = 'avg',
+    filter = gubunValue,
     distance = distanceValue,
     region = selectedRegions.length > 0 ? (selectedRegions[0].title === '전체' ? '' : selectedRegions[0].title) : '',
+    option = selectedOptions,
   ) => {
-    if (filter === 'distance') {
+    if (option['parking'][0]?.value === 'Y') {
       dispatch(
         mainActions.fetchMainFoodList({
           params: {
@@ -144,6 +75,7 @@ const MainView = ({ navigation }) => {
             longitude: 127.02751,
             latitude: 37.498095,
             keyword: region,
+            parkingYn: 'Y',
           },
         }),
       )
@@ -180,7 +112,7 @@ const MainView = ({ navigation }) => {
           onPress={() => {
             gubunSheetRef.current.snapToIndex(0)
           }}>
-          <Text style={{ color: 'gray' }}>{filterValue === 'avg' ? '평점순' : filterValue === 'cnt' ? '리뷰순' : '거리순'}</Text>
+          <Text style={{ color: 'gray' }}>{gubunValue === 'avg' ? '평점순' : gubunValue === 'cnt' ? '리뷰순' : '거리순'}</Text>
           <Image source={require('@images/downArrow.png')} style={{ width: 7, height: 7, marginLeft: 5 }}></Image>
         </TouchableOpacity>
         <View style={{ flexDirection: 'row', marginRight: 10 }}>
@@ -205,15 +137,23 @@ const MainView = ({ navigation }) => {
               flexDirection: 'row',
               alignItems: 'center',
               borderWidth: 1,
-              borderColor: 'gray',
+              borderColor: Utility.isEqual(initialSelectedOptions, selectedOptions) ? 'gray' : '#ef8835',
               borderRadius: 50,
               width: 65,
               height: 30,
               justifyContent: 'center',
               marginLeft: 10,
+            }}
+            onPress={() => {
+              setSelectedCurrentOptions(selectedOptions)
+              filterSheetRef.current.snapToIndex(0)
             }}>
-            <Image source={require('@images/filter.png')} style={{ width: 18, height: 18, alignSelf: 'center' }}></Image>
-            <Text style={{ color: 'gray', fontSize: 13, marginLeft: 5 }}>필터</Text>
+            <Image
+              source={Utility.isEqual(initialSelectedOptions, selectedOptions) ? require('@images/filter.png') : require('@images/filterActive.png')}
+              style={{ width: 18, height: 18, alignSelf: 'center' }}></Image>
+            <Text style={{ color: Utility.isEqual(initialSelectedOptions, selectedOptions) ? 'gray' : '#ef8835', fontSize: 13, marginLeft: 5 }}>
+              필터
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -364,17 +304,17 @@ const MainView = ({ navigation }) => {
               height: 40,
               alignItems: 'center',
               justifyContent: 'center',
-              borderWidth: filterValue === 'avg' ? 2 : 0,
+              borderWidth: gubunValue === 'avg' ? 2 : 0,
               borderRadius: 20,
               borderColor: '#ef8835',
             }}
             onPress={() => {
               _refreshList()
               _fetchMainFoodList('avg')
-              setFilterValue('avg')
+              setGubunValue('avg')
               gubunSheetRef.current.close()
             }}>
-            <Text style={{ color: filterValue === 'avg' ? '#ef8835' : 'lightgray' }}>평점순</Text>
+            <Text style={{ color: gubunValue === 'avg' ? '#ef8835' : 'lightgray' }}>평점순</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -382,7 +322,7 @@ const MainView = ({ navigation }) => {
               height: 40,
               alignItems: 'center',
               justifyContent: 'center',
-              borderWidth: filterValue === 'cnt' ? 2 : 0,
+              borderWidth: gubunValue === 'cnt' ? 2 : 0,
               borderRadius: 20,
               borderColor: '#ef8835',
               marginLeft: 20,
@@ -390,10 +330,10 @@ const MainView = ({ navigation }) => {
             onPress={() => {
               _refreshList()
               _fetchMainFoodList('cnt')
-              setFilterValue('cnt')
+              setGubunValue('cnt')
               gubunSheetRef.current.close()
             }}>
-            <Text style={{ color: filterValue === 'cnt' ? '#ef8835' : 'lightgray' }}>리뷰순</Text>
+            <Text style={{ color: gubunValue === 'cnt' ? '#ef8835' : 'lightgray' }}>리뷰순</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -401,7 +341,7 @@ const MainView = ({ navigation }) => {
               height: 40,
               alignItems: 'center',
               justifyContent: 'center',
-              borderWidth: filterValue === 'distance' ? 2 : 0,
+              borderWidth: gubunValue === 'distance' ? 2 : 0,
               borderRadius: 20,
               borderColor: '#ef8835',
               marginLeft: 20,
@@ -409,10 +349,10 @@ const MainView = ({ navigation }) => {
             onPress={() => {
               _refreshList()
               _fetchMainFoodList('distance')
-              setFilterValue('distance')
+              setGubunValue('distance')
               gubunSheetRef.current.close()
             }}>
-            <Text style={{ color: filterValue === 'distance' ? '#ef8835' : 'lightgray' }}>거리순</Text>
+            <Text style={{ color: gubunValue === 'distance' ? '#ef8835' : 'lightgray' }}>거리순</Text>
           </TouchableOpacity>
         </View>
         <View style={{ alignItems: 'flex-end', marginTop: 10 }}>
@@ -451,7 +391,7 @@ const MainView = ({ navigation }) => {
             onPress={distance => {
               setDistanceValue(distance)
               _refreshList()
-              _fetchMainFoodList(filterValue, distance)
+              _fetchMainFoodList(gubunValue, distance)
               distanceSheetRef.current.close()
             }}
           />
@@ -460,10 +400,10 @@ const MainView = ({ navigation }) => {
     )
   }
 
-  const _renderContent = () => {
+  const _regionContent = () => {
     return (
       <>
-        <View style={{ height: 270, marginTop: 10 }}>{_regionContent()}</View>
+        <View style={{ height: 270, marginTop: 10 }}>{_regionView()}</View>
         <View style={{ alignItems: 'center' }}>
           <TouchableOpacity
             style={{
@@ -482,7 +422,7 @@ const MainView = ({ navigation }) => {
               }
               _refreshList()
               dispatch(mainActions.setSelectedRegions(selectedCurrentRegions))
-              _fetchMainFoodList(filterValue, distanceValue, selectedCurrentRegions[0]?.title === '전체' ? '' : selectedCurrentRegions[0]?.title)
+              _fetchMainFoodList(gubunValue, distanceValue, selectedCurrentRegions[0]?.title === '전체' ? '' : selectedCurrentRegions[0]?.title)
               regionSheetRef.current.close()
             }}>
             <Text style={{ color: 'white' }}>적용</Text>
@@ -499,7 +439,7 @@ const MainView = ({ navigation }) => {
     )
   }
 
-  const _regionContent = () => {
+  const _regionView = () => {
     let views = regions?.reduce((result = [], item, index) => {
       const isItemSelected = _isSelected(item)
       result.push(
@@ -592,6 +532,184 @@ const MainView = ({ navigation }) => {
     dispatch(mainActions.setMainList([]))
   }
 
+  const _filterContent = () => {
+    return (
+      <>
+        <View
+          style={{
+            height: 40,
+            backgroundColor: 'lightgrey',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingHorizontal: 20,
+            paddingVertical: 12,
+          }}>
+          <TouchableOpacity
+            onPress={() => {
+              filterSheetRef.current.close()
+            }}>
+            <Text style={{ fontSize: 16 }}>취소</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              _refreshList()
+              dispatch(mainActions.setSelectedOptions(selectedCurrentOptions))
+              _fetchMainFoodList(
+                gubunValue,
+                distanceValue,
+                selectedCurrentRegions[0]?.title === '전체' ? '' : selectedCurrentRegions[0]?.title,
+                selectedCurrentOptions,
+              )
+              filterSheetRef.current.close()
+            }}>
+            <Text style={{ fontSize: 16, color: '#ef8835' }}>필터 적용</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ flex: 1 }}>
+          <SectionList
+            ref={sectionList}
+            style={{ flex: 1 }}
+            sections={options}
+            keyExtractor={(item, index) => item + index}
+            renderItem={_filterItem}
+          />
+        </View>
+      </>
+    )
+  }
+
+  const _filterSectionHeader = section => {
+    return (
+      <View style={{ height: 70, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 15 }}>{section.title}</Text>
+        {section.isMultiSelectable ? <Text style={{ position: 'absolute', right: 20, color: 'grey' }}>중복선택가능</Text> : null}
+      </View>
+    )
+  }
+
+  const _filterItem = ({ section, item, index }) => {
+    return (
+      <View style={{ borderBottomWidth: section.type !== 'parking' ? 1 : 0, borderBottomColor: 'lightgrey' }}>
+        {index === 0 ? _filterSectionHeader(section) : null}
+        <View style={{ alignItems: 'center', marginBottom: 30 }}>{_items(section, item.items)}</View>
+      </View>
+    )
+  }
+
+  const _isSelectedOption = (section, item) => {
+    let selected = selectedCurrentOptions[section]
+    if (Utility.isNil(selected)) {
+      return false
+    }
+
+    return (
+      selected.findIndex(v => {
+        return v.value === item.value
+      }) >= 0
+    )
+  }
+
+  const _onOptionSelect = (section, items, item, isSelected) => {
+    let selected = Object.assign({}, selectedCurrentOptions)
+    if (Utility.isNil(selected[section.type])) {
+      selected[section.type] = []
+    }
+
+    let selectedType = [...selected[section.type]]
+    if (isSelected) {
+      let selectedCategories = selected[section.type]
+      let filtered = selectedCategories.filter(v => {
+        return item.value === undefined || v.value === undefined ? v.name !== item.name : v.value !== item.value
+      })
+      selected[section.type] = [...filtered]
+    } else {
+      if (section.isMultiSelectable) {
+        selectedType.push(
+          ...items
+            .filter(v => (item.value === undefined || v.value === undefined ? v.name === item.name : v.value === item.value))
+            .reduce((result = [], value) => {
+              result.push({ ...value })
+              return result
+            }, []),
+        )
+        selected[section.type] = selectedType
+      } else {
+        selected[section.type] = [{ ...item }]
+      }
+    }
+    setSelectedCurrentOptions(selected)
+  }
+
+  const _items = (section, items) => {
+    let views = items?.reduce((result = [], item, index) => {
+      const isItemSelected = _isSelectedOption(section.type, item)
+      if (section.type === 'category' || section.type === 'parking') {
+        result.push(
+          <TouchableOpacity
+            key={index}
+            style={{
+              paddingVertical: 10,
+              paddingHorizontal: 25,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginHorizontal: 15,
+              borderWidth: isItemSelected ? 1 : 0,
+              borderColor: '#ef8835',
+              borderRadius: 20,
+            }}
+            onPress={() => _onOptionSelect(section, items, item, isItemSelected)}>
+            <Text style={{ color: isItemSelected ? '#ef8835' : 'lightgrey' }}>{item?.name}</Text>
+          </TouchableOpacity>,
+        )
+      } else if (section.type === 'menu') {
+        result.push(
+          <TouchableOpacity
+            key={index}
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: index > 3 ? 0 : 20,
+              marginHorizontal: 15,
+            }}
+            onPress={() => _onOptionSelect(section, items, item, isItemSelected)}>
+            <Image source={isItemSelected ? item.activeImg : item.img} style={{ width: 70, height: 70, marginBottom: 5 }} />
+            <Text style={{ color: isItemSelected ? '#ef8835' : 'lightgrey' }}>{item?.name}</Text>
+          </TouchableOpacity>,
+        )
+      } else if (section.type === 'price') {
+        result.push(
+          <TouchableOpacity
+            key={index}
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginHorizontal: 10,
+              borderWidth: 2,
+              borderColor: isItemSelected ? '#ef8835' : 'lightgrey',
+              width: 70,
+              height: 70,
+              borderRadius: 70 / 2,
+            }}
+            onPress={() => _onOptionSelect(section, items, item, isItemSelected)}>
+            <Text style={{ color: isItemSelected ? '#ef8835' : 'lightgrey' }}>{item?.name}</Text>
+          </TouchableOpacity>,
+        )
+      }
+
+      return result
+    }, [])
+
+    return (
+      <View
+        style={{
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+        }}>
+        {views}
+      </View>
+    )
+  }
+
   return (
     <>
       <SafeBaseView
@@ -603,10 +721,8 @@ const MainView = ({ navigation }) => {
             indicatorStyle="black"
             onScrollEndDrag={({ nativeEvent }) => {
               if (_isCloseToBottom(nativeEvent)) {
-                console.log('mainList.length : ', mainList.length)
-                console.log('pageInfo ; ', pageInfo)
                 if (mainList.length >= 4 && pageInfo.totalPage >= page.current) {
-                  _fetchMainFoodList(filterValue)
+                  _fetchMainFoodList(gubunValue)
                 }
               }
             }}>
@@ -620,7 +736,7 @@ const MainView = ({ navigation }) => {
         ref={gubunSheetRef}
         index={-1}
         snapPoints={['18%']}
-        enablePanDownToClose={true}
+        enableContentPanningGesture={false}
         handleStyle={{ display: 'none' }}
         backdropComponent={backdropProps => (
           <BottomSheetBackdrop {...backdropProps} enableTouchThrough={true} appearsOnIndex={0} disappearsOnIndex={-1} />
@@ -631,7 +747,7 @@ const MainView = ({ navigation }) => {
         ref={distanceSheetRef}
         index={-1}
         snapPoints={['18%']}
-        enablePanDownToClose={true}
+        enableContentPanningGesture={false}
         handleStyle={{ display: 'none' }}
         backdropComponent={backdropProps => (
           <BottomSheetBackdrop {...backdropProps} enableTouchThrough={true} appearsOnIndex={0} disappearsOnIndex={-1} />
@@ -647,7 +763,23 @@ const MainView = ({ navigation }) => {
         backdropComponent={backdropProps => (
           <BottomSheetBackdrop {...backdropProps} enableTouchThrough={true} appearsOnIndex={0} disappearsOnIndex={-1} />
         )}>
-        {_renderContent()}
+        {_regionContent()}
+      </BottomSheet>
+      <BottomSheet
+        ref={filterSheetRef}
+        index={-1}
+        snapPoints={['80%']}
+        enableContentPanningGesture={false}
+        handleStyle={{ display: 'none' }}
+        backdropComponent={backdropProps => (
+          <BottomSheetBackdrop {...backdropProps} enableTouchThrough={true} appearsOnIndex={0} disappearsOnIndex={-1} />
+        )}
+        onClose={() => {
+          sectionList.current.scrollToLocation({
+            itemIndex: 0,
+          })
+        }}>
+        {_filterContent()}
       </BottomSheet>
     </>
   )
