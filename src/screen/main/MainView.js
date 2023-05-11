@@ -51,6 +51,7 @@ const MainView = ({ navigation }) => {
   const filterSheetRef = useRef(null)
   const [selectedCurrentOptions, setSelectedCurrentOptions] = useState({})
   const sectionList = useRef(null)
+  const regionsList = useRef(null)
 
   useEffect(() => {
     _fetchMainFoodList()
@@ -62,36 +63,133 @@ const MainView = ({ navigation }) => {
   const _fetchMainFoodList = (
     filter = gubunValue,
     distance = distanceValue,
-    region = selectedRegions.length > 0 ? (selectedRegions[0].title === '전체' ? '' : selectedRegions[0].title) : '',
+    region = selectedRegions.length > 0 ? selectedRegions[0].title : '',
     option = selectedOptions,
   ) => {
     if (option['parking'][0]?.value === 'Y') {
-      dispatch(
-        mainActions.fetchMainFoodList({
-          params: {
-            guBun: filter,
-            curPage: page.current,
-            distanceLimit: distanceMeter[distance],
-            longitude: 127.02751,
-            latitude: 37.498095,
-            keyword: region,
-            parkingYn: 'Y',
-          },
-        }),
-      )
+      if (region !== '') {
+        if (option['menu']?.length > 0) {
+          let category = ''
+          option['menu'].map(item => {
+            category = category.concat(item.value, ',')
+          })
+          dispatch(
+            mainActions.fetchMainFoodList({
+              params: {
+                guBun: filter,
+                curPage: page.current,
+                keyword: region === '전체' ? '' : region,
+                parkingYn: 'Y',
+                categoryKey: category,
+              },
+            }),
+          )
+        } else {
+          dispatch(
+            mainActions.fetchMainFoodList({
+              params: {
+                guBun: filter,
+                curPage: page.current,
+                keyword: region === '전체' ? '' : region,
+                parkingYn: 'Y',
+              },
+            }),
+          )
+        }
+      } else {
+        if (option['menu']?.length > 0) {
+          let category = ''
+          option['menu'].map(item => {
+            category = category.concat(item.value, ',')
+          })
+          dispatch(
+            mainActions.fetchMainFoodList({
+              params: {
+                guBun: filter,
+                curPage: page.current,
+                distanceLimit: distanceMeter[distance],
+                longitude: 127.02751,
+                latitude: 37.498095,
+                parkingYn: 'Y',
+                categoryKey: category,
+              },
+            }),
+          )
+        } else {
+          dispatch(
+            mainActions.fetchMainFoodList({
+              params: {
+                guBun: filter,
+                curPage: page.current,
+                distanceLimit: distanceMeter[distance],
+                longitude: 127.02751,
+                latitude: 37.498095,
+                parkingYn: 'Y',
+              },
+            }),
+          )
+        }
+      }
     } else {
-      dispatch(
-        mainActions.fetchMainFoodList({
-          params: {
-            guBun: filter,
-            curPage: page.current,
-            distanceLimit: distanceMeter[distance],
-            longitude: 127.02751,
-            latitude: 37.498095,
-            keyword: region,
-          },
-        }),
-      )
+      if (region !== '') {
+        if (option['menu']?.length > 0) {
+          let category = ''
+          option['menu'].map(item => {
+            category = category.concat(item.value, ',')
+          })
+          dispatch(
+            mainActions.fetchMainFoodList({
+              params: {
+                guBun: filter,
+                curPage: page.current,
+                keyword: region === '전체' ? '' : region,
+                categoryKey: category,
+              },
+            }),
+          )
+        } else {
+          dispatch(
+            mainActions.fetchMainFoodList({
+              params: {
+                guBun: filter,
+                curPage: page.current,
+                keyword: region === '전체' ? '' : region,
+              },
+            }),
+          )
+        }
+      } else {
+        if (option['menu']?.length > 0) {
+          let category = ''
+          option['menu'].map(item => {
+            category = category.concat(item.value, ',')
+          })
+          dispatch(
+            mainActions.fetchMainFoodList({
+              params: {
+                guBun: filter,
+                curPage: page.current,
+                distanceLimit: distanceMeter[distance],
+                longitude: 127.02751,
+                latitude: 37.498095,
+                categoryKey: category,
+              },
+            }),
+          )
+        } else {
+          dispatch(
+            mainActions.fetchMainFoodList({
+              params: {
+                guBun: filter,
+                curPage: page.current,
+                distanceLimit: distanceMeter[distance],
+                longitude: 127.02751,
+                latitude: 37.498095,
+              },
+            }),
+          )
+        }
+      }
     }
     page.current = page.current + 1
   }
@@ -127,10 +225,21 @@ const MainView = ({ navigation }) => {
               justifyContent: 'center',
             }}
             onPress={() => {
-              distanceSheetRef.current.snapToIndex(0)
+              if (selectedRegions?.length < 1) {
+                distanceSheetRef.current.snapToIndex(0)
+              } else {
+                _refreshList()
+                setSelectedCurrentRegions([])
+                dispatch(mainActions.setSelectedRegions([]))
+                _fetchMainFoodList(gubunValue, distanceValue, '', selectedOptions)
+              }
             }}>
-            <Image source={require('@images/gps.png')} style={{ width: 15, height: 15, alignSelf: 'center' }}></Image>
-            <Text style={{ color: '#ef8835', fontSize: 13, marginLeft: 5 }}>{distanceStep[distanceValue]}</Text>
+            <Image
+              source={selectedRegions?.length < 1 ? require('@images/gps.png') : require('@images/return.png')}
+              style={{ width: 15, height: 15, alignSelf: 'center' }}></Image>
+            <Text style={{ color: '#ef8835', fontSize: 13, marginLeft: 5 }}>
+              {selectedRegions?.length < 1 ? distanceStep[distanceValue] : '내 주변'}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -171,7 +280,7 @@ const MainView = ({ navigation }) => {
                 {index + 1}. {item.name}
               </Text>
               <Text style={{ color: 'gray', fontSize: 13, marginTop: 5 }}>
-                {item.region.regionName} {item.distanceGap}
+                {item.region.regionName} {selectedRegions?.length > 0 ? '' : item.distanceGap}
               </Text>
               <View style={{ flexDirection: 'row' }}>
                 <Image source={require('@images/reviewCnt.png')} style={{ width: 10, height: 10, alignSelf: 'center' }}></Image>
@@ -187,7 +296,18 @@ const MainView = ({ navigation }) => {
       )
       return result
     }, [])
-    return <View style={{ flexDirection: 'row', flexWrap: 'wrap', flexGrow: 1, flexShrink: 1, marginLeft: 10 }}>{views}</View>
+    const _noDataView = () => {
+      return (
+        <View style={{ alignSelf: 'center', marginTop: 200 }}>
+          <Text style={{ color: 'grey', fontSize: 16 }}>정보를 찾을 수 없습니다.</Text>
+        </View>
+      )
+    }
+    return views.length < 1 ? (
+      _noDataView()
+    ) : (
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', flexGrow: 1, flexShrink: 1, marginLeft: 10 }}>{views}</View>
+    )
   }
 
   const _isCloseToBottom = ({ layoutMeasurement, contentOffset, contentSize }) => {
@@ -422,7 +542,7 @@ const MainView = ({ navigation }) => {
               }
               _refreshList()
               dispatch(mainActions.setSelectedRegions(selectedCurrentRegions))
-              _fetchMainFoodList(gubunValue, distanceValue, selectedCurrentRegions[0]?.title === '전체' ? '' : selectedCurrentRegions[0]?.title)
+              _fetchMainFoodList(gubunValue, distanceValue, selectedCurrentRegions[0]?.title === '전체' ? '전체' : selectedCurrentRegions[0]?.title)
               regionSheetRef.current.close()
             }}>
             <Text style={{ color: 'white' }}>적용</Text>
@@ -471,7 +591,7 @@ const MainView = ({ navigation }) => {
     }, [])
 
     return (
-      <ScrollView>
+      <ScrollView ref={regionsList}>
         <View style={{ justifyContent: 'center', flexDirection: 'row', flexWrap: 'wrap' }}>{views}</View>
       </ScrollView>
     )
@@ -557,7 +677,7 @@ const MainView = ({ navigation }) => {
               _fetchMainFoodList(
                 gubunValue,
                 distanceValue,
-                selectedCurrentRegions[0]?.title === '전체' ? '' : selectedCurrentRegions[0]?.title,
+                selectedCurrentRegions[0]?.title === '전체' ? '전체' : selectedCurrentRegions[0]?.title,
                 selectedCurrentOptions,
               )
               filterSheetRef.current.close()
@@ -762,7 +882,13 @@ const MainView = ({ navigation }) => {
         handleStyle={{ display: 'none' }}
         backdropComponent={backdropProps => (
           <BottomSheetBackdrop {...backdropProps} enableTouchThrough={true} appearsOnIndex={0} disappearsOnIndex={-1} />
-        )}>
+        )}
+        onClose={() => {
+          regionsList.current?.scrollTo({
+            y: 0,
+            animated: false,
+          })
+        }}>
         {_regionContent()}
       </BottomSheet>
       <BottomSheet
