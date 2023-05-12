@@ -662,7 +662,7 @@ const MainView = ({ navigation }) => {
             flexDirection: 'row',
             justifyContent: 'space-between',
             paddingHorizontal: 20,
-            paddingVertical: 12,
+            paddingVertical: 10,
           }}>
           <TouchableOpacity
             onPress={() => {
@@ -855,7 +855,7 @@ const MainView = ({ navigation }) => {
       <BottomSheet
         ref={gubunSheetRef}
         index={-1}
-        snapPoints={['18%']}
+        snapPoints={[DeviceUtility.isIos ? '18%' : '25%']}
         enableContentPanningGesture={false}
         handleStyle={{ display: 'none' }}
         backdropComponent={backdropProps => (
@@ -866,7 +866,7 @@ const MainView = ({ navigation }) => {
       <BottomSheet
         ref={distanceSheetRef}
         index={-1}
-        snapPoints={['18%']}
+        snapPoints={[DeviceUtility.isIos ? '18%' : '25%']}
         enableContentPanningGesture={false}
         handleStyle={{ display: 'none' }}
         backdropComponent={backdropProps => (
@@ -877,7 +877,7 @@ const MainView = ({ navigation }) => {
       <BottomSheet
         ref={regionSheetRef}
         index={-1}
-        snapPoints={['40%']}
+        snapPoints={[DeviceUtility.isIos ? '40%' : '54%']}
         enableContentPanningGesture={false}
         handleStyle={{ display: 'none' }}
         backdropComponent={backdropProps => (
@@ -894,7 +894,7 @@ const MainView = ({ navigation }) => {
       <BottomSheet
         ref={filterSheetRef}
         index={-1}
-        snapPoints={['80%']}
+        snapPoints={[DeviceUtility.isIos ? '80%' : '84%']}
         enableContentPanningGesture={false}
         handleStyle={{ display: 'none' }}
         backdropComponent={backdropProps => (
