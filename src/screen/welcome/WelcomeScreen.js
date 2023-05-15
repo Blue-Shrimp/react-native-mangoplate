@@ -5,7 +5,7 @@ const WelcomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <ImageBackground source={require('@images/welcomeImg.jpg')} style={styles.backgroundImage}>
-        <TouchableOpacity style={styles.closeButton} onPress={() => navigation.replace('TabNavigation')}>
+        <TouchableOpacity style={styles.closeButton} onPress={() => navigation.replace('PermissionScreen')}>
           <Image source={require('@images/close.png')}></Image>
         </TouchableOpacity>
         <View>

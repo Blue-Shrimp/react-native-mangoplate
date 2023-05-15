@@ -3,6 +3,12 @@ import { createSlice } from '@reduxjs/toolkit'
 export const sliceName = 'main'
 
 const initialState = {
+  myLocation: {
+    latitude: 37.498095,
+    longitude: 127.02751,
+    isLocationPermission: false,
+  },
+  isLocationPermission: false,
   mainList: [],
   pageInfo: {},
   carousel: [
@@ -234,6 +240,14 @@ const initialState = {
 }
 
 const reducers = {
+  setMyLocation: (state, { payload }) => {
+    state.myLocation = payload
+  },
+
+  setIsLocationPermission: (state, { payload }) => {
+    state.isLocationPermission = payload
+  },
+
   setMainList: (state, { payload }) => {
     state.mainList = payload
   },

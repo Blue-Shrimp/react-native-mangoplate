@@ -7,6 +7,7 @@ import { Provider } from 'react-redux'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import createStore from '@stores'
 import { default as WelcomeScreen } from '@screens/welcome/WelcomeScreen'
+import { default as PermissionScreen } from '@screens/welcome/PermissionScreen'
 import { default as TabNavigation } from '@screens/TabNavigation'
 
 import '@common/Constants'
@@ -32,6 +33,7 @@ const App = () => {
                 presentation: 'modal',
               }}>
               <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
+              <Stack.Screen name="PermissionScreen" component={PermissionScreen} />
               <Stack.Screen name="TabNavigation" component={TabNavigation} />
             </Stack.Navigator>
           </NavigationContainer>

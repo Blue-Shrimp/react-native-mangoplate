@@ -1,3 +1,4 @@
 import WelcomeScreen from './WelcomeScreen'
+import PermissionScreen from './PermissionScreen'
 
-export { WelcomeScreen }
+export { WelcomeScreen, PermissionScreen }

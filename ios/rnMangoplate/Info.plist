@@ -37,8 +37,12 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>접근을 허용하면, 현재 위치를 활용하여 주변의 가까운 식당을 편하게 찾을 수 있어요.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>접근을 허용하면, 현재 위치를 활용하여 주변의 가까운 식당을 편하게 찾을 수 있어요.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>접근을 허용하면, 현재 위치를 활용하여 주변의 가까운 식당을 편하게 찾을 수 있어요.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

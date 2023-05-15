@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity, ImageBackground, SectionList } from 'react-native'
+import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity, ImageBackground, SectionList, Alert, AppState } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { SafeBaseView } from '@components'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
 import Animated from 'react-native-reanimated'
-import BottomSheet, { BottomSheetModal, BottomSheetModalProvider, BottomSheetBackdrop } from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet'
 import StepIndicator from 'react-native-step-indicator'
 import { Utility } from '@common'
+import Permissions from '@common/PermissionUtil'
+import Geolocation from 'react-native-geolocation-service'
 
-import { states as mainStates, actions as mainActions } from './state'
+import { states as mainStates, actions as mainActions } from '@screens/main/state'
 
 const distanceMeter = [100, 300, 500, 1000, 3000]
 const distanceStep = ['100m', '300m', '500m', '1km', '3km']
@@ -37,9 +39,21 @@ const customStyles = {
 }
 
 const MainView = ({ navigation }) => {
+  const appState = useRef(AppState.currentState)
   const dispatch = useDispatch()
-  const { mainList, pageInfo, carousel, regions, selectedRegions, options, initialSelectedOptions, selectedOptions, loading } =
-    useSelector(mainStates)
+  const {
+    myLocation,
+    isLocationPermission,
+    mainList,
+    pageInfo,
+    carousel,
+    regions,
+    selectedRegions,
+    options,
+    initialSelectedOptions,
+    selectedOptions,
+    loading,
+  } = useSelector(mainStates)
   const page = useRef(1)
   const [activeSlide, setActiveSlide] = useState(0)
   const gubunSheetRef = useRef(null)
@@ -52,13 +66,114 @@ const MainView = ({ navigation }) => {
   const [selectedCurrentOptions, setSelectedCurrentOptions] = useState({})
   const sectionList = useRef(null)
   const regionsList = useRef(null)
+  const isCheckingPermissions = useRef(false)
 
   useEffect(() => {
-    _fetchMainFoodList()
+    AppState.addEventListener('change', handleAppStateChange)
+    _requestPermission()
+    return () => {
+      AppState.removeEventListener('change', handleAppStateChange)
+    }
   }, [])
+
+  const handleAppStateChange = nextAppState => {
+    if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+      if (isCheckingPermissions.current) {
+        _requestPermission()
+      }
+      isCheckingPermissions.current = false
+    }
+    if (appState.current.match(/inactive|active/) && nextAppState === 'background') {
+    }
+    appState.current = nextAppState
+  }
+
+  useEffect(() => {
+    if (myLocation?.isDefaultLocation) {
+      setSelectedCurrentRegions([])
+      dispatch(mainActions.setSelectedRegions([]))
+      _refreshList()
+      _fetchMainFoodList(gubunValue, distanceValue, '')
+    }
+  }, [myLocation])
 
   console.log(mainList)
   console.log(pageInfo)
+
+  const _requestPermission = async () => {
+    await Permissions.checkPermission()
+      .then(response => {
+        dispatch(mainActions.setIsLocationPermission(true))
+        _getCurrentLocation()
+      })
+      .catch(error => {
+        return Permissions.requestLocation()
+          .then(response => {
+            dispatch(mainActions.setIsLocationPermission(true))
+            _getCurrentLocation()
+          })
+          .catch(denyError => {
+            dispatch(mainActions.setIsLocationPermission(false))
+            _refreshList()
+            setSelectedCurrentRegions([{ id: '1', title: '제주도' }])
+            dispatch(mainActions.setSelectedRegions([{ id: '1', title: '제주도' }]))
+            _fetchMainFoodList(gubunValue, distanceValue, '제주도')
+          })
+      })
+  }
+
+  const _getCurrentLocation = () => {
+    Geolocation.getCurrentPosition(
+      position => {
+        const { latitude, longitude } = position.coords
+        const current = {
+          latitude: latitude,
+          longitude: longitude,
+          isDefaultLocation: true,
+        }
+
+        dispatch(mainActions.setMyLocation(current))
+      },
+      error => {
+        _confirmPermission()
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 10000,
+      },
+    )
+    return
+  }
+
+  const _confirmPermission = async () => {
+    return Permissions.checkPermission()
+      .then(response => {
+        return Promise.resolve(true)
+      })
+      .catch(error => {
+        const title = '위치권한 필요'
+        const message = '위치권한 동의'
+        const buttons = [
+          {
+            text: '허용 안함',
+            onPress: () => {
+              return Promise.reject(true)
+            },
+            style: 'cancel',
+          },
+          {
+            text: '설정 이동',
+            onPress: () => {
+              isCheckingPermissions.current = true
+              Permissions.openSetting()
+              return Promise.reject(false)
+            },
+          },
+        ]
+        Alert.alert(title, message, buttons)
+      })
+  }
 
   const _fetchMainFoodList = (
     filter = gubunValue,
@@ -108,8 +223,8 @@ const MainView = ({ navigation }) => {
                 guBun: filter,
                 curPage: page.current,
                 distanceLimit: distanceMeter[distance],
-                longitude: 127.02751,
-                latitude: 37.498095,
+                longitude: myLocation.longitude,
+                latitude: myLocation.latitude,
                 parkingYn: 'Y',
                 categoryKey: category,
               },
@@ -122,8 +237,8 @@ const MainView = ({ navigation }) => {
                 guBun: filter,
                 curPage: page.current,
                 distanceLimit: distanceMeter[distance],
-                longitude: 127.02751,
-                latitude: 37.498095,
+                longitude: myLocation.longitude,
+                latitude: myLocation.latitude,
                 parkingYn: 'Y',
               },
             }),
@@ -170,8 +285,8 @@ const MainView = ({ navigation }) => {
                 guBun: filter,
                 curPage: page.current,
                 distanceLimit: distanceMeter[distance],
-                longitude: 127.02751,
-                latitude: 37.498095,
+                longitude: myLocation.longitude,
+                latitude: myLocation.latitude,
                 categoryKey: category,
               },
             }),
@@ -183,8 +298,8 @@ const MainView = ({ navigation }) => {
                 guBun: filter,
                 curPage: page.current,
                 distanceLimit: distanceMeter[distance],
-                longitude: 127.02751,
-                latitude: 37.498095,
+                longitude: myLocation.longitude,
+                latitude: myLocation.latitude,
               },
             }),
           )
@@ -225,20 +340,17 @@ const MainView = ({ navigation }) => {
               justifyContent: 'center',
             }}
             onPress={() => {
-              if (selectedRegions?.length < 1) {
+              if (selectedRegions?.length < 1 && isLocationPermission) {
                 distanceSheetRef.current.snapToIndex(0)
               } else {
-                _refreshList()
-                setSelectedCurrentRegions([])
-                dispatch(mainActions.setSelectedRegions([]))
-                _fetchMainFoodList(gubunValue, distanceValue, '', selectedOptions)
+                _getCurrentLocation()
               }
             }}>
             <Image
-              source={selectedRegions?.length < 1 ? require('@images/gps.png') : require('@images/return.png')}
+              source={selectedRegions?.length > 0 || !isLocationPermission ? require('@images/return.png') : require('@images/gps.png')}
               style={{ width: 15, height: 15, alignSelf: 'center' }}></Image>
             <Text style={{ color: '#ef8835', fontSize: 13, marginLeft: 5 }}>
-              {selectedRegions?.length < 1 ? distanceStep[distanceValue] : '내 주변'}
+              {selectedRegions?.length > 0 || !isLocationPermission ? '내 주변' : distanceStep[distanceValue]}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
