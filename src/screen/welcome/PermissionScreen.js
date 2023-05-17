@@ -44,12 +44,7 @@ const PermissionScreen = ({ navigation }) => {
                 await _requestPermission()
                 navigation.replace('TabNavigation')
               }}>
-              <Text style={{ color: 'white', fontSize: 16 }}>동의하기</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{ width: 200, height: 40, borderRadius: 30, alignItems: 'center', justifyContent: 'center' }}
-              onPress={() => navigation.replace('TabNavigation')}>
-              <Text style={{ color: '#ef8835', fontSize: 16 }}>싫어요</Text>
+              <Text style={{ color: 'white', fontSize: 16 }}>확인</Text>
             </TouchableOpacity>
           </View>
         </View>

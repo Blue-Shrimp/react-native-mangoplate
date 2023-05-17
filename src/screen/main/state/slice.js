@@ -6,7 +6,8 @@ const initialState = {
   myLocation: {
     latitude: 37.498095,
     longitude: 127.02751,
-    isLocationPermission: false,
+    isDefaultLocation: false,
+    regsion: '',
   },
   isLocationPermission: false,
   mainList: [],
@@ -32,7 +33,7 @@ const initialState = {
     },
     {
       id: '1',
-      title: '서울시',
+      title: '서울',
     },
     {
       id: '2',

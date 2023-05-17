@@ -13,11 +13,14 @@ import { default as TabNavigation } from '@screens/TabNavigation'
 import '@common/Constants'
 import '@network/Fetch'
 import '@common/DeviceInfo'
+import '@common/Preference'
 
 const App = () => {
   const Stack = createStackNavigator()
 
   const store = createStore()
+
+  const routeScreen = !'welcome'.getBool() ? 'WelcomeScreen' : 'TabNavigation'
 
   return (
     <Fragment>
@@ -26,7 +29,7 @@ const App = () => {
         <SafeAreaProvider>
           <NavigationContainer>
             <Stack.Navigator
-              initialRouteName="WelcomeScreen"
+              initialRouteName={routeScreen}
               screenOptions={{
                 headerShown: false,
                 gestureEnabled: false,

@@ -5770,6 +5770,11 @@ react-native-permissions@^3.8.0:
     picocolors "^1.0.0"
     pkg-dir "^5.0.0"
 
+react-native-preference@^2.2.3:
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/react-native-preference/-/react-native-preference-2.2.3.tgz#290f6afa0e311381333077c1cc74f7ca31897f29"
+  integrity sha512-hQgBhKJtzzMn/XeW+bAqEgKaY9kjg+n6ykAcHnGQuQwUdaOiARo66k9kHLPbZNSHmXJYie3YmmFT7y6+R+mk6Q==
+
 react-native-reanimated@^2.13.0:
   version "2.14.4"
   resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-2.14.4.tgz#3fa3da4e7b99f5dfb28f86bcf24d9d1024d38836"

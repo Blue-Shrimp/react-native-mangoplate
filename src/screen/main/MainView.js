@@ -9,6 +9,7 @@ import StepIndicator from 'react-native-step-indicator'
 import { Utility } from '@common'
 import Permissions from '@common/PermissionUtil'
 import Geolocation from 'react-native-geolocation-service'
+import { KakaoService } from '@network'
 
 import { states as mainStates, actions as mainActions } from '@screens/main/state'
 
@@ -90,6 +91,7 @@ const MainView = ({ navigation }) => {
 
   useEffect(() => {
     if (myLocation?.isDefaultLocation) {
+      'regions'.clear()
       setSelectedCurrentRegions([])
       dispatch(mainActions.setSelectedRegions([]))
       _refreshList()
@@ -113,11 +115,16 @@ const MainView = ({ navigation }) => {
             _getCurrentLocation()
           })
           .catch(denyError => {
+            console.log("'regions'.getValue() : ", 'regions'.getObject())
             dispatch(mainActions.setIsLocationPermission(false))
             _refreshList()
-            setSelectedCurrentRegions([{ id: '1', title: '제주도' }])
-            dispatch(mainActions.setSelectedRegions([{ id: '1', title: '제주도' }]))
-            _fetchMainFoodList(gubunValue, distanceValue, '제주도')
+            if (!Utility.isNil('regions'.getObject())) {
+              setSelectedCurrentRegions('regions'.getObject())
+              dispatch(mainActions.setSelectedRegions('regions'.getObject()))
+              _fetchMainFoodList(gubunValue, distanceValue, 'regions'.getObject()[0]?.title)
+            } else {
+              regionSheetRef.current.snapToIndex(0)
+            }
           })
       })
   }
@@ -126,13 +133,18 @@ const MainView = ({ navigation }) => {
     Geolocation.getCurrentPosition(
       position => {
         const { latitude, longitude } = position.coords
-        const current = {
-          latitude: latitude,
-          longitude: longitude,
-          isDefaultLocation: true,
-        }
+        let myRegion = ''
+        KakaoService.getAddressByCoordinate(position.coords).then(result => {
+          myRegion = result[0]?.address?.region_1depth_name
+          const current = {
+            latitude: latitude,
+            longitude: longitude,
+            isDefaultLocation: true,
+            region: myRegion,
+          }
 
-        dispatch(mainActions.setMyLocation(current))
+          dispatch(mainActions.setMyLocation(current))
+        })
       },
       error => {
         _confirmPermission()
@@ -439,7 +451,9 @@ const MainView = ({ navigation }) => {
       <View style={{ flexDirection: 'row' }}>
         <Text style={{ fontSize: 20, fontWeight: '500' }}>
           {selectedRegions?.length < 1
-            ? '관악구'
+            ? isLocationPermission
+              ? myLocation?.region
+              : '지역을 설정해주세요'
             : selectedRegions?.length > 1
             ? selectedRegions[selectedRegions.length - 1]?.title + ' 외 ' + (selectedRegions.length - 1) + '곳'
             : selectedRegions[0]?.title}
@@ -654,6 +668,7 @@ const MainView = ({ navigation }) => {
               }
               _refreshList()
               dispatch(mainActions.setSelectedRegions(selectedCurrentRegions))
+              'regions'.setValue(selectedCurrentRegions)
               _fetchMainFoodList(gubunValue, distanceValue, selectedCurrentRegions[0]?.title === '전체' ? '전체' : selectedCurrentRegions[0]?.title)
               regionSheetRef.current.close()
             }}>
