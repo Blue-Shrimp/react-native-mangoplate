@@ -99,9 +99,6 @@ const MainView = ({ navigation }) => {
     }
   }, [myLocation])
 
-  console.log(mainList)
-  console.log(pageInfo)
-
   const _requestPermission = async () => {
     await Permissions.checkPermission()
       .then(response => {
@@ -465,7 +462,7 @@ const MainView = ({ navigation }) => {
 
   const _rightButtons = () => [
     <View key={1} style={{ flexDirection: 'row', marginRight: 15 }}>
-      <TouchableOpacity style={{ justifyContent: 'center' }}>
+      <TouchableOpacity style={{ justifyContent: 'center' }} onPress={() => navigation.navigate('SearchScreen')}>
         <Image resizeMode={'contain'} source={require('@images/search.png')} style={{ width: 30, height: 30 }}></Image>
       </TouchableOpacity>
       <Text style={{ color: 'lightgray', fontSize: 30, marginLeft: 10 }}>|</Text>
