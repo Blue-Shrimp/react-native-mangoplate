@@ -9,11 +9,17 @@ const initialState = {
   addresses: {
     data: [],
   },
+  searchList: [],
+  pageInfo: {},
   loading: false,
 }
 
 const reducers = {
   fetchAddress: (state, { payload }) => {
+    state.loading = true
+  },
+
+  fetchSearchFoodList: (state, { payload }) => {
     state.loading = true
   },
 
@@ -26,6 +32,14 @@ const reducers = {
     state.loading = false
   },
 
+  setSearchList: (state, { payload }) => {
+    state.searchList = payload
+  },
+
+  setPageInfo: (state, { payload }) => {
+    state.pageInfo = payload
+  },
+
   reset: (state, { payload }) => {
     state.recentKeywords = SearchKeywords.keywords()
     state.addresses = {
@@ -33,6 +47,19 @@ const reducers = {
     }
     state.loading = false
   },
+
+  onSuccessData: (state, { payload }) => {
+    let { type, data } = payload
+    if (data.number + 1 >= 2) {
+      state.searchList = [...state.searchList, ...data.content]
+      state.pageInfo = { totalRecord: data.totalElements, totalPage: data.totalPages, offset: data.number + 1, limit: data.size }
+    } else {
+      state.searchList = data.content
+      state.pageInfo = { totalRecord: data.totalElements, totalPage: data.totalPages, offset: data.number + 1, limit: data.size }
+    }
+    state.loading = false
+  },
+
   onError: (state, { payload }) => {
     state.loading = false
   },

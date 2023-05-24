@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { StyleSheet, View, TextInput, TouchableOpacity, Image, Text, Keyboard, FlatList } from 'react-native'
+import { StyleSheet, View, TextInput, TouchableOpacity, Image, Text, Keyboard, FlatList, ScrollView } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { SafeBaseView } from '@components'
 import { SearchKeywords } from '@common'
 import SearchTabView from './SearchTabView'
 import { actions as searchActions, states as searchStates } from '@screens/search/state'
+import { states as mainStates, actions as mainActions } from '@screens/main/state'
+import FoodListView from '@screens/main/subviews/FoodListView'
 
 const SearchType = {
   Recommend: 'Recommend',
@@ -14,7 +16,10 @@ const SearchType = {
 
 const SearchScreen = ({ navigation }) => {
   const dispatch = useDispatch()
-  const { recommendKeywords, recentKeywords, addresses, loading } = useSelector(searchStates)
+  const { recommendKeywords, recentKeywords, addresses, searchList, pageInfo, loading } = useSelector(searchStates)
+  const { myLocation, isLocationPermission } = useSelector(mainStates)
+  const page = useRef(1)
+  const [isSearch, setIsSearch] = useState(false)
   const inputRef = useRef(null)
   const [datas, setDatas] = useState([])
   const [searchText, setSearchText] = useState('')
@@ -71,8 +76,10 @@ const SearchScreen = ({ navigation }) => {
   }
 
   const _onSearch = () => {
+    if (searchText === '') {
+      return
+    }
     Keyboard.dismiss()
-    SearchKeywords.add(searchText)
     dispatch(searchActions.fetchAddress({ keyword: searchText }))
   }
 
@@ -124,6 +131,11 @@ const SearchScreen = ({ navigation }) => {
         keyboardAppearance={'default'}
         onSubmitEditing={_onSearch}
         value={searchText}
+        onFocus={() => {
+          dispatch(searchActions.setSearchList([]))
+          dispatch(searchActions.fetchAddress({ keyword: searchText }))
+          setIsSearch(false)
+        }}
       />
     </View>,
   ]
@@ -137,7 +149,18 @@ const SearchScreen = ({ navigation }) => {
           activeOpacity={1}
           onPress={() => {
             setSearchText(item.value)
-            dispatch(searchActions.fetchAddress({ keyword: item.value }))
+            SearchKeywords.add(item.value)
+            setIsSearch(true)
+            setSearchInfo({ ...searchInfo, ...{ type: SearchType.None } })
+            dispatch(
+              searchActions.fetchSearchFoodList({
+                params: {
+                  guBun: 'avg',
+                  curPage: page.current,
+                  keyword: item.name,
+                },
+              }),
+            )
           }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Image source={require('@images/search.png')} style={{ width: 20, height: 20, marginRight: 10 }}></Image>
@@ -177,8 +200,13 @@ const SearchScreen = ({ navigation }) => {
             onSelectTab={_onSelectTab}
           />
         )}
-
-        <FlatList data={datas[0]?.data} renderItem={_renderItem} keyExtractor={(item, index) => index} />
+        {isSearch ? (
+          <ScrollView>
+            <FoodListView data={searchList} region={['']} />
+          </ScrollView>
+        ) : (
+          <FlatList data={datas[0]?.data} renderItem={_renderItem} keyExtractor={(item, index) => index} />
+        )}
       </View>
     </SafeBaseView>
   )
