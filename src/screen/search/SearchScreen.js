@@ -157,7 +157,7 @@ const SearchScreen = ({ navigation }) => {
                 params: {
                   guBun: 'avg',
                   curPage: page.current,
-                  keyword: item.name,
+                  keyword: item.name || item.value,
                 },
               }),
             )
